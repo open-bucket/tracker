@@ -1,0 +1,19 @@
+{
+  "name": "tracker",
+  "version": "0.0.0",
+  "description": "Tracker of open-bucket network",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/open-bucket/tracker.git"
+  },
+  "author": "open-bucket",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/open-bucket/tracker/issues"
+  },
+  "homepage": "https://github.com/open-bucket/tracker#readme"
+}
