@@ -1,15 +1,19 @@
-const router = require('express').Router();
+/**
+ *  Lib imports
+ */
 // eslint-disable-next-line no-unused-vars
-const log = require('debug')('obn-tracker:ctl:consumer');
+const log = require('debug')('obn-tracker:routes:producer');
 
-// Register route's path
-router.path = '/consumers';
+/**
+ * Project imports
+ */
+const {createRoute} = require('../util');
 
 function registerConsumer(request, response) {
-    response.send('OK la!!');
+    // This is a sample endpoint
+    response.send('registerConsumer - OK');
 }
 
-// Register child routes
-router.post('/', registerConsumer);
-
-module.exports = router;
+module.exports = createRoute('/consumers', (router) => {
+    return router.post('/', registerConsumer);
+});
