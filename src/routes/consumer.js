@@ -2,7 +2,7 @@
  *  Lib imports
  */
 // eslint-disable-next-line no-unused-vars
-const log = require('debug')('obn-tracker:routes:producer');
+const log = require('debug')('obn-tracker:routes:consumer');
 
 /**
  * Project imports
