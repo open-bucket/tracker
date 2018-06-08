@@ -1,0 +1,36 @@
+{
+  "env": {
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:jest/recommended"
+  ],
+  "plugins": [
+    "jest"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 8,
+    "ecmaFeatures": {
+      "experimentalObjectRestSpread": true
+    }
+  },
+  "rules": {
+    "indent": [
+      "error",
+      4
+    ],
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ]
+  }
+}
