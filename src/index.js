@@ -21,8 +21,14 @@ function serverListenT(app, port) {
         .orElse(({message}) => Task.of({HttpServer: {state: 'ERROR', message}}));
 }
 
+function establishDBConnection() {
+    return Task.fromPromised(db.sequelize.authenticate.bind(db.sequelize))()
+        .map(constant({DB: {state: 'OK', message: 'DB connection has been established successfully'}}))
+        .orElse(({message}) => Task.of({DB: {state: 'ERROR', message}}));
+}
+
 function createStartupTasks() {
-    return db.connectT()
+    return establishDBConnection()
         .chain(logT('DB Status: \n'))
         .chain(constant(serverListenT(app, PORT)))
         .chain(logT('HTTP Server Status: \n'))

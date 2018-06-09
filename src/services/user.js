@@ -1,18 +1,17 @@
 /**
- * Lib imports
+ * Project imports
  */
-const User = require('../db/user');
-const Task = require('folktale/concurrency/task');
+const {createLogFn} = require('../utils');
+const db = require('../db');
 
-function _createUserT({username, password}) {
-    return Task.fromNodeback(User.create.bind(User))({username, password});
-}
+// eslint-disable-next-line no-unused-vars
+const log = createLogFn('services:user');
 
-function registerT(data) {
-    // Naive save to save time - TODO: hash password
-    return _createUserT(data);
+function register({username, password}) {
+    // Naively save password - TODO: hash password
+    return db.User.create({username, password});
 }
 
 module.exports = {
-    registerT
+    register
 };

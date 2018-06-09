@@ -13,7 +13,6 @@ const log = createLogFn('routes:consumer');
 
 router
     .post('/', (request, response) => {
-        // const {ethAddress} = request.body;
         // This is a sample endpoint
         response.send('createConsumer :( - OK');
     });
