@@ -1,6 +1,6 @@
 {
   "name": "tracker",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Tracker of open-bucket network",
   "main": "src/index.js",
   "scripts": {
@@ -24,6 +24,8 @@
     "debug": "^3.1.0",
     "errorhandler": "^1.5.0",
     "express": "^4.16.3",
+    "folktale": "^2.1.0",
+    "mongoose": "^5.1.4",
     "morgan": "^1.9.0",
     "ramda": "^0.25.0",
     "require-all": "^2.2.0"

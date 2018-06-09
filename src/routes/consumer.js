@@ -1,13 +1,10 @@
 /**
- *  Lib imports
- */
-// eslint-disable-next-line no-unused-vars
-const log = require('debug')('obn-tracker:routes:consumer');
-
-/**
  * Project imports
  */
-const {createRoute} = require('../util');
+const {createLogFn, createRoute} = require('../utils');
+
+// eslint-disable-next-line no-unused-vars
+const log = createLogFn('routes:consumer');
 
 function registerConsumer(request, response) {
     // This is a sample endpoint
