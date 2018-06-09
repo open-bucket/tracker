@@ -5,14 +5,6 @@ const {curry} = require('ramda');
 const Task = require('folktale/concurrency/task');
 const debug = require('debug');
 
-function createRoute(path, createChildRouterFn) {
-    return function (router) {
-        router.path = path;
-        router = createChildRouterFn(router);
-        return router;
-    };
-}
-
 function constant(v) {
     return function value() {
         return v;
@@ -40,7 +32,6 @@ const createLogFn = curry(_createLogFn);
 const createLogFnT = curry(_createLogFnT);
 
 module.exports = {
-    createRoute,
     constant,
     createLogFn,
     createLogFnT

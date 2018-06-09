@@ -25,7 +25,7 @@ function createStartupTasks() {
     return db.connectT()
         .chain(logT('DB Status: \n'))
         .chain(constant(serverListenT(app, PORT)))
-        .chain(logT('HttpServer Status: \n'))
+        .chain(logT('HTTP Server Status: \n'))
         .chain(constant(logT('Tracker has been started.', null)));
 }
 

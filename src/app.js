@@ -7,6 +7,9 @@ const errorHandler = require('errorhandler');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 
+/**
+ * Project imports
+ */
 const routes = require('./routes');
 
 function createExpressApp() {

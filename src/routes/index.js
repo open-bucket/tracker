@@ -2,7 +2,6 @@
  *  Lib imports
  */
 // eslint-disable-next-line no-unused-vars
-const log = require('debug')('obn-tracker:ctl:index');
 const {values} = require('ramda');
 const router = require('express').Router();
 const path = require('path');
@@ -12,17 +11,18 @@ const path = require('path');
  * Project imports
  */
 // Includes all files in current dir except the current file
-const routeCtors = require('require-all')({
+const routes = require('require-all')({
     dirname: __dirname,
     filter: (fileName) => fileName !== path.basename(__filename) && fileName
 });
+const {createLogFn} = require('../utils');
+
+// eslint-disable-next-line no-unused-vars
+const log = createLogFn('routes:index');
 
 function createRouter(router) {
-    return values(routeCtors)
-        .reduce((router, currentRouteCtor) => {
-            const currentRoute = currentRouteCtor(router);
-            return router.use(currentRoute.path, currentRoute);
-        }, router);
+    return values(routes)
+        .map(({path, router: childRouter}) => router.use(path, childRouter));
 }
 
 module.exports = createRouter(router);
