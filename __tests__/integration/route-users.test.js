@@ -3,18 +3,13 @@
  */
 const supertest = require('supertest');
 const {CREATED, BAD_REQUEST, OK} = require('http-status-codes');
-const {partialRight} = require('ramda');
-const jwt = require('jsonwebtoken');
-const {promisify} = require('util');
 
 /**
  * Project imports
  */
 const app = require('../../src/app');
 const db = require('../../src/db');
-const {JWT_SECRET} = require('../../src/configs');
-
-const verifyJWT = partialRight(promisify(jwt.verify), [JWT_SECRET]);
+const {verifyJWT} = require('../../src/services/crypto');
 
 describe('Users Route Unit Test', () => {
     const URL = '/users';
@@ -94,6 +89,27 @@ describe('Users Route Unit Test', () => {
         // THEN
         expect(response.statusCode).toBe(OK);
         await expect(verifyJWT(response.body.token)).resolves.toMatchObject(expectedDecodedTokenInfo);
+    });
+
+    it('should return BAD_REQUEST when Login with incorrect username or password', async () => {
+        // GIVEN
+        const EXISTING_USER = {
+            username: 'helloWorld',
+            password: 'helloWorld'
+        };
+        await db.User.create(EXISTING_USER);
+        const expectedError = {
+            msg: 'username or password is incorrect'
+        };
+
+        // WHEN
+        const response = await supertest(app)
+            .post(`${URL}/login`)
+            .send({username: 'oopss', password: 'oopss'});
+
+        // THEN
+        expect(response.statusCode).toBe(BAD_REQUEST);
+        expect(response.body).toEqual(expectedError);
     });
 
 });

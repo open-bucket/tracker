@@ -2,7 +2,7 @@
  * Lib imports
  */
 const router = require('express').Router();
-const {CREATED, OK} = require('http-status-codes');
+const {CREATED, OK, BAD_REQUEST} = require('http-status-codes');
 const {check} = require('express-validator/check');
 
 /**
@@ -37,7 +37,9 @@ router
         ]),
         (request, response, next) => {
             return login(request.body)
-                .then((data) => response.status(OK).send(data))
+                .then((data) => data
+                    ? response.status(OK).send(data)
+                    : response.status(BAD_REQUEST).send({msg: 'username or password is incorrect'}))
                 .catch(next);
         });
 
