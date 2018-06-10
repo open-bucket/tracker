@@ -6,5 +6,6 @@ module.exports = {
     DB_HOST: process.env.DB_HOST || 'localhost',
     DB_PORT: Number(process.env.DB_PORT) || 5432,
     DB_NAME: process.env.DB_NAME || 'obn',
-    DB_LOGGING: process.env.DB_LOGGING == true
+    DB_LOGGING: process.env.DB_LOGGING == true,
+    JWT_SECRET: process.env.JWT_SECRET || 'shhhh'
 };

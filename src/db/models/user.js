@@ -12,5 +12,11 @@ module.exports = (sequelize, DataTypes) => {
         // associations can be defined here
     };
 
+    User.prototype.toJSON = function () {
+        const obj = this.get();
+        delete obj.password;
+        return obj;
+    };
+
     return User;
 };
