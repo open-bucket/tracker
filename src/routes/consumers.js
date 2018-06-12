@@ -17,9 +17,10 @@ const log = createLogFn('routes:consumer');
 
 router
     .get('/:id',
-        validate([check('id')
-            .not().isEmpty()
-            .isNumeric()]),
+        validate([
+            check('id').not().isEmpty()
+                .isNumeric()]
+        ),
         auth(), (request, response, next) => {
             const {id} = request.params;
             const userId = request.user.id;

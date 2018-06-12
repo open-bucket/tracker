@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+export NODE_ENV='test'
 export DB_USERNAME='hungnvu'
 export DB_DIALECT='postgres'
 export DB_HOST='localhost'

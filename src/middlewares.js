@@ -1,7 +1,7 @@
 /**
  * Lib imports
  */
-const {BAD_REQUEST, UNAUTHORIZED, INTERNAL_SERVER_ERROR} = require('http-status-codes');
+const {BAD_REQUEST, UNAUTHORIZED, INTERNAL_SERVER_ERROR, NOT_FOUND} = require('http-status-codes');
 const {validationResult} = require('express-validator/check');
 
 /**
@@ -17,7 +17,7 @@ const log = createLogFn('middlewares');
 function sequelizeErrorHandler(error, request, response, next) {
     if (error.name === 'SequelizeUniqueConstraintError') {
         const message = `${error.errors[0].path} already exists`;
-        response.status(BAD_REQUEST).send({message});
+        response.status(BAD_REQUEST).send(message);
     } else if (error.name === 'SequelizeDatabaseError') {
         log('DB Error: ', error);
         response.status(INTERNAL_SERVER_ERROR).send(error.message);
@@ -46,13 +46,16 @@ function auth() {
 
         const auth = request.headers.authorization;
 
-        log('auth: ', auth);
         return auth
             ? _verifyToken(auth.substring('Bearer '.length))
                 .then(userId => getUserById(userId))
                 .then(user => {
-                    request.user = user;
-                    next();
+                    if (user) {
+                        request.user = user;
+                        next();
+                    } else {
+                        response.status(NOT_FOUND).send('User is not found');
+                    }
                 })
                 .catch((error) => response.status(UNAUTHORIZED).send(error))
             : response.status(UNAUTHORIZED).send('Token is invalid');

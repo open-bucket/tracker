@@ -1,4 +1,5 @@
 module.exports = {
+    NODE_ENV: process.env.NODE_ENV || 'development',
     PORT: Number(process.env.TRACKER_PORT) || 3000,
     DB_USERNAME: process.env.DB_USERNAME || 'hungnvu',
     DB_PASSWORD: process.env.DB_PASSWORD || null,

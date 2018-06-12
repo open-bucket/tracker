@@ -41,12 +41,11 @@ describe('/users integration test', () => {
         await db.User.create(EXISTING_USER);
 
         // WHEN
-        const response = await testAPI(HTTP_METHODS.POST, URL)
-            .send(EXISTING_USER);
+        const response = await testAPI(HTTP_METHODS.POST, URL).send(EXISTING_USER);
 
         // THEN
         expect(response.statusCode).toBe(BAD_REQUEST);
-        expect(response.body).toEqual({message: 'username already exists'});
+        expect(response.text).toEqual('username already exists');
     });
 
     it('should return BAD_REQUEST when sending missing fields', async () => {
