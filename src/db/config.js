@@ -7,7 +7,7 @@ const config = {
     host: DB_HOST,
     port: DB_PORT,
     dialect: DB_DIALECT,
-    logging: DB_LOGGING,
+    logging: Boolean(DB_LOGGING),
     migrationStorage: 'sequelize',
     seederStorage: 'sequelize'
 };

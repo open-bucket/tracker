@@ -5,17 +5,10 @@ module.exports = (sequelize, DataTypes) => {
             unique: true
         },
         password: DataTypes.STRING
-    }, {paranoid: true});
-
+    });
 
     User.associate = function (models) {
-        // associations can be defined here
-    };
-
-    User.prototype.toJSON = function () {
-        const obj = this.get();
-        delete obj.password;
-        return obj;
+        User.hasMany(models.Consumer, { foreignKey: 'userId' });
     };
 
     return User;

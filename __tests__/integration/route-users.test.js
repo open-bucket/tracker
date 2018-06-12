@@ -1,17 +1,17 @@
 /**
  * Lib imports
  */
-const supertest = require('supertest');
-const {CREATED, BAD_REQUEST, OK} = require('http-status-codes');
+const {CREATED, BAD_REQUEST, OK, UNAUTHORIZED} = require('http-status-codes');
 
 /**
  * Project imports
  */
-const app = require('../../src/app');
+const {HTTP_METHODS} = require('../../src/enums');
 const db = require('../../src/db');
 const {verifyJWT} = require('../../src/services/crypto');
+const {testAPI, login} = require('./utils');
 
-describe('Users Route Unit Test', () => {
+describe('/users integration test', () => {
     const URL = '/users';
 
     beforeEach(() => {
@@ -23,17 +23,16 @@ describe('Users Route Unit Test', () => {
         await db.sequelize.close();
     });
 
-    it('should return 201 when register new user successfully', async () => {
+    it('should return CREATED when register new user successfully', async () => {
         // WHEN
-        const response = await supertest(app)
-            .post(URL)
+        const response = await testAPI(HTTP_METHODS.POST, URL)
             .send({username: 'validUsername', password: 'validPassword'});
 
         // THEN
         expect(response.statusCode).toBe(CREATED);
     });
 
-    it('should return 400 when register a user with existing username', async () => {
+    it('should return BAD_REQUEST when register a user with existing username', async () => {
         // GIVEN
         const EXISTING_USER = {
             username: 'helloWorld',
@@ -42,8 +41,7 @@ describe('Users Route Unit Test', () => {
         await db.User.create(EXISTING_USER);
 
         // WHEN
-        const response = await supertest(app)
-            .post(URL)
+        const response = await testAPI(HTTP_METHODS.POST, URL)
             .send(EXISTING_USER);
 
         // THEN
@@ -51,7 +49,7 @@ describe('Users Route Unit Test', () => {
         expect(response.body).toEqual({message: 'username already exists'});
     });
 
-    it('should return 400 when sending missing fields', async () => {
+    it('should return BAD_REQUEST when sending missing fields', async () => {
         // GIVEN
         const missingCases = [{password: 'helloWorld'}, {username: 'helloWorld'}, {}];
 
@@ -60,7 +58,7 @@ describe('Users Route Unit Test', () => {
             resMissingUsername,
             resMissingPassword,
             resMissingAll
-        ] = await Promise.all(missingCases.map(c => supertest(app).post(URL).send(c)));
+        ] = await Promise.all(missingCases.map(c => testAPI(HTTP_METHODS.POST, URL).send(c)));
 
         // THEN
         expect(resMissingUsername.statusCode).toBe(BAD_REQUEST);
@@ -82,9 +80,7 @@ describe('Users Route Unit Test', () => {
         const expectedDecodedTokenInfo = {userId: 1};
 
         // WHEN
-        const response = await supertest(app)
-            .post(`${URL}/login`)
-            .send(EXISTING_USER);
+        const response = await testAPI(HTTP_METHODS.POST, `${URL}/login`).send(EXISTING_USER);
 
         // THEN
         expect(response.statusCode).toBe(OK);
@@ -103,13 +99,40 @@ describe('Users Route Unit Test', () => {
         };
 
         // WHEN
-        const response = await supertest(app)
-            .post(`${URL}/login`)
-            .send({username: 'oopss', password: 'oopss'});
+        const response = await testAPI(HTTP_METHODS.POST, `${URL}/login`).send({username: 'oopss', password: 'oopss'});
 
         // THEN
         expect(response.statusCode).toBe(BAD_REQUEST);
         expect(response.body).toEqual(expectedError);
+    });
+
+    it('should return UNAUTHORIZED when get user info with incorrect token', async () => {
+        // WHEN
+        const response = await testAPI(HTTP_METHODS.GET, `${URL}/me`, {token: 'invalid token'}).send();
+
+        // THEN
+        expect(response.statusCode).toBe(UNAUTHORIZED);
+    });
+
+    it('should return OK and User info when get user info with correct token', async () => {
+        // GIVEN
+        const EXISTING_USER = {
+            username: 'helloWorld',
+            password: 'helloWorld'
+        };
+        const expectedUserInfo = {
+            id: 1,
+            username: 'helloWorld'
+        };
+        await db.User.create(EXISTING_USER);
+        const token = await login(EXISTING_USER);
+
+        // WHEN
+        const response = await testAPI(HTTP_METHODS.GET, `${URL}/me`, {token}).send();
+
+        // THEN
+        expect(response.statusCode).toBe(OK);
+        expect(response.body).toMatchObject(expectedUserInfo);
     });
 
 });
