@@ -23,7 +23,15 @@ function getConsumerByIdAndUserId({id, userId}) {
     });
 }
 
+function getConsumerByUserId(userId) {
+    return db.Consumer.findAll({
+        attributes: {exclude: ['key']},
+        where: {userId}
+    });
+}
+
 module.exports = {
     create,
-    getConsumerByIdAndUserId
+    getConsumerByIdAndUserId,
+    getConsumerByUserId
 };

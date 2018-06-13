@@ -4,9 +4,9 @@
   "description": "Tracker of open-bucket network",
   "main": "src/index.js",
   "scripts": {
-    "dev": "source .env.dev.sh && nodemon ./src",
-    "dev-log-all": "source .env.dev.sh && DEBUG=* nodemon ./src",
-    "test:integration": "source .env.test.sh && jest __tests__/integration/",
+    "dev": "nodemon ./src",
+    "dev-log-all": "DEBUG=* nodemon ./src",
+    "test:integration": "jest __tests__/integration/",
     "sequelize": "sequelize"
   },
   "repository": {

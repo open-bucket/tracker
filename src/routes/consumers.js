@@ -10,7 +10,7 @@ const {check} = require('express-validator/check');
  */
 const {createLogFn} = require('../utils');
 const {validate, auth} = require('../middlewares');
-const {create, getConsumerByIdAndUserId} = require('../services/consumer');
+const {create, getConsumerByIdAndUserId, getConsumerByUserId} = require('../services/consumer');
 
 // eslint-disable-next-line no-unused-vars
 const log = createLogFn('routes:consumer');
@@ -19,8 +19,7 @@ router
     .get('/:id',
         validate([
             check('id').not().isEmpty()
-                .isNumeric()]
-        ),
+                .isNumeric()]),
         auth(), (request, response, next) => {
             const {id} = request.params;
             const userId = request.user.id;
@@ -30,6 +29,10 @@ router
                     : response.status(NOT_FOUND).send(`Can't find your consumer with id: ${request.params.id}`))
                 .catch(next);
         })
+    .get('/', auth(), (request, response, next) =>
+        getConsumerByUserId(request.user.id)
+            .then(consumers => response.send(consumers))
+            .catch(next))
     .post('/',
         validate([check('address').trim().not().isEmpty()]),
         auth(),
