@@ -45,7 +45,7 @@ router
             login(request.body)
                 .then((data) => data
                     ? response.status(OK).send(data)
-                    : response.status(BAD_REQUEST).send({msg: 'username or password is incorrect'}))
+                    : response.status(BAD_REQUEST).send('username or password is incorrect'))
                 .catch(next));
 
 module.exports = {

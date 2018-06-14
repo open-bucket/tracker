@@ -93,16 +93,13 @@ describe('/users integration test', () => {
             password: 'helloWorld'
         };
         await db.User.create(EXISTING_USER);
-        const expectedError = {
-            msg: 'username or password is incorrect'
-        };
 
         // WHEN
         const response = await testAPI(HTTP_METHODS.POST, `${URL}/login`).send({username: 'oopss', password: 'oopss'});
 
         // THEN
         expect(response.statusCode).toBe(BAD_REQUEST);
-        expect(response.body).toEqual(expectedError);
+        expect(response.body).toEqual('username or password is incorrect');
     });
 
     it('should return UNAUTHORIZED when get user info with incorrect token', async () => {
