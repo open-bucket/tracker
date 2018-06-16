@@ -99,7 +99,7 @@ describe('/users integration test', () => {
 
         // THEN
         expect(response.statusCode).toBe(BAD_REQUEST);
-        expect(response.body).toEqual('username or password is incorrect');
+        expect(response.text).toEqual('username or password is incorrect');
     });
 
     it('should return UNAUTHORIZED when get user info with incorrect token', async () => {

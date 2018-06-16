@@ -10,10 +10,6 @@ module.exports = {
             address: {
                 type: Sequelize.STRING
             },
-            key: {
-                type: Sequelize.STRING,
-                unique: true
-            },
             userId: {
                 type: Sequelize.INTEGER,
                 references: {
