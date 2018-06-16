@@ -21,8 +21,10 @@ function register({username, password}) {
 }
 
 function login({username, password}) {
-    return db.User.findOne({where: {username, password}})
-        .then(user => user && {userInfo: user.toJSON(), token: createJWT({userId: user.id})});
+    return db.User.findOne({
+        attributes: {exclude: ['password']},
+        where: {username, password}
+    }).then(userInfo => userInfo && {userInfo, token: createJWT({userId: userInfo.id})});
 }
 
 module.exports = {
