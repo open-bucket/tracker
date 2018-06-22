@@ -58,7 +58,7 @@ function auth() {
                     }
                 })
                 .catch((error) => response.status(UNAUTHORIZED).send(error))
-            : response.status(UNAUTHORIZED).send('Token is invalid');
+            : response.status(UNAUTHORIZED).send('Auth token is invalid');
     };
 }
 

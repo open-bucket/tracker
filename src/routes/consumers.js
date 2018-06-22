@@ -43,6 +43,10 @@ router
                 .then((data) => response.status(CREATED).send(data))
                 .catch(next);
         });
+// TODO: make PUT endpoint, user can edit address only when consumer state is INACTIVE
+// User can upgrade consumer Tier
+
+// TODO: make DELETE endpoint, if user delete active consumer, user can withdraw their Ether from the contract of that consumer
 
 module.exports = {
     path: '/consumers',

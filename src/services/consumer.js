@@ -1,9 +1,4 @@
 /**
- * Lib imports
- */
-const uuid = require('uuid/v4');
-
-/**
  * Project imports
  */
 const db = require('../db');
@@ -13,21 +8,15 @@ const {createLogFn} = require('../utils');
 const log = createLogFn('services:consumer');
 
 function create({address, userId}) {
-    return db.Consumer.create({address, userId, key: uuid()});
+    return db.Consumer.create({address, userId});
 }
 
 function getConsumerByIdAndUserId({id, userId}) {
-    return db.Consumer.findOne({
-        attributes: {exclude: ['key']},
-        where: {id, userId}
-    });
+    return db.Consumer.findOne({where: {id, userId}});
 }
 
 function getConsumerByUserId(userId) {
-    return db.Consumer.findAll({
-        attributes: {exclude: ['key']},
-        where: {userId}
-    });
+    return db.Consumer.findAll({where: {userId}});
 }
 
 module.exports = {
