@@ -1,12 +1,12 @@
 /**
  * Project imports
  */
-const {createLogFn} = require('../utils');
+const {createDebugLogger} = require('../utils');
 const db = require('../db');
 const {createJWT} = require('./crypto');
 
 // eslint-disable-next-line no-unused-vars
-const log = createLogFn('services:user');
+const log = createDebugLogger('services:user');
 
 function getUserById(userId) {
     return db.User.findOne({

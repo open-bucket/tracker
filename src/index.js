@@ -2,7 +2,7 @@
  * Lib imports
  */
 const http = require('http');
-const Task = require('folktale/concurrency/task');
+const BPromise = require('bluebird');
 
 /**
  * Project imports
@@ -10,31 +10,34 @@ const Task = require('folktale/concurrency/task');
 const app = require('./app');
 const {PORT} = require('./configs');
 const db = require('./db');
-const {createLogFnT, constant} = require('./utils');
+const {createDebugLoggerP, constant} = require('./utils');
 
-const logT = createLogFnT('index');
+const logP = createDebugLoggerP('index');
 
-function serverListenT(app, port) {
+// create a new Activator Contract if the environment is dev
+// Use existing Activator Contract if the environment is prod
+
+function serverListenP(app, port) {
     const server = http.createServer(app);
-    return Task.fromNodeback(server.listen.bind(server))(port)
-        .map(constant({HttpServer: {state: 'OK', message: `HTTP Server is listening on port: ${port}`}}))
-        .orElse(({message}) => Task.of({HttpServer: {state: 'ERROR', message}}));
+    return BPromise.promisify(server.listen.bind(server))(port)
+        .then(constant({HttpServer: {state: 'OK', message: `HTTP Server is listening on port: ${port}`}}))
+        .catch(({message}) => ({HttpServer: {state: 'ERROR', message}}));
 }
 
-function establishDBConnection() {
-    return Task.fromPromised(db.sequelize.authenticate.bind(db.sequelize))()
-        .map(constant({DB: {state: 'OK', message: 'DB connection has been established successfully'}}))
-        .orElse(({message}) => Task.of({DB: {state: 'ERROR', message}}));
+function establishDBConnectionP() {
+    return db.sequelize.authenticate()
+        .then(constant({DB: {state: 'OK', message: 'DB connection has been established successfully'}}))
+        .catch(({message}) => ({DB: {state: 'ERROR', message}}));
 }
 
 function createStartupTasks() {
-    return establishDBConnection()
-        .chain(logT('DB Status: \n'))
-        .chain(constant(serverListenT(app, PORT)))
-        .chain(logT('HTTP Server Status: \n'))
-        .chain(constant(logT('Tracker has been started.', null)));
+    return establishDBConnectionP()
+        .then(logP('DB Status: \n'))
+        .then(constant(serverListenP(app, PORT)))
+        .then(logP('HTTP Server Status: \n'));
 }
 
-createStartupTasks().run();
+createStartupTasks()
+    .then(() => logP('Tracker has been started.', null));
 
 

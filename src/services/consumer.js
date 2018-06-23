@@ -2,10 +2,10 @@
  * Project imports
  */
 const db = require('../db');
-const {createLogFn} = require('../utils');
+const {createDebugLogger} = require('../utils');
 
 // eslint-disable-next-line no-unused-vars
-const log = createLogFn('services:consumer');
+const log = createDebugLogger('services:consumer');
 
 function create({address, userId}) {
     return db.Consumer.create({address, userId});

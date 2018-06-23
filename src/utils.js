@@ -2,7 +2,7 @@
  * Lib imports
  */
 const {curry} = require('ramda');
-const Task = require('folktale/concurrency/task');
+const BPromise = require('bluebird');
 const debug = require('debug');
 
 function constant(v) {
@@ -20,19 +20,19 @@ function _trace(logFunc, msg, value) {
     return value;
 }
 
-function _createLogFn(namespace, msg, value) {
+function _createDebugLogger(namespace, msg, value) {
     return _trace(debug(`obn-tracker:${namespace}`), msg, value);
 }
 
-function _createLogFnT(namespace, msg, value) {
-    return Task.of(_createLogFn(namespace, msg, value));
+function _createDebugLoggerP(namespace, msg, value) {
+    return BPromise.resolve(_createDebugLogger(namespace, msg, value));
 }
 
-const createLogFn = curry(_createLogFn);
-const createLogFnT = curry(_createLogFnT);
+const createDebugLogger = curry(_createDebugLogger);
+const createDebugLoggerP = curry(_createDebugLoggerP);
 
 module.exports = {
     constant,
-    createLogFn,
-    createLogFnT
+    createDebugLogger,
+    createDebugLoggerP
 };

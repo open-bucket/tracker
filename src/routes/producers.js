@@ -6,10 +6,10 @@ const router = require('express').Router();
 /**
  * Project imports
  */
-const {createLogFn} = require('../utils');
+const {createDebugLogger} = require('../utils');
 
 // eslint-disable-next-line no-unused-vars
-const log = createLogFn('routes:producer');
+const log = createDebugLogger('routes:producer');
 
 router
     .post('/', (request, response) => {
