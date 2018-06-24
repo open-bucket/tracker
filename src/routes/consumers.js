@@ -8,12 +8,12 @@ const {check} = require('express-validator/check');
 /**
  * Project imports
  */
-const {createLogFn} = require('../utils');
+const {createDebugLogger} = require('../utils');
 const {validate, auth} = require('../middlewares');
 const {create, getConsumerByIdAndUserId, getConsumerByUserId} = require('../services/consumer');
 
 // eslint-disable-next-line no-unused-vars
-const log = createLogFn('routes:consumer');
+const log = createDebugLogger('routes:consumer');
 
 router
     .get('/:id',

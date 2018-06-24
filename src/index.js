@@ -1,40 +1,52 @@
 /**
  * Lib imports
  */
+const ContractService = require('@open-bucket/contracts');
 const http = require('http');
-const Task = require('folktale/concurrency/task');
+const BPromise = require('bluebird');
 
 /**
  * Project imports
  */
 const app = require('./app');
-const {PORT} = require('./configs');
+const Configs = require('./configs');
 const db = require('./db');
-const {createLogFnT, constant} = require('./utils');
+const {createDebugLoggerP, createDebugLogger, constant} = require('./utils');
+const {activateConsumerHandler} = require('./services/consumer');
 
-const logT = createLogFnT('index');
+const logP = createDebugLoggerP('index');
+const log = createDebugLogger('index');
 
-function serverListenT(app, port) {
+function serverListenP(app, port) {
     const server = http.createServer(app);
-    return Task.fromNodeback(server.listen.bind(server))(port)
-        .map(constant({HttpServer: {state: 'OK', message: `HTTP Server is listening on port: ${port}`}}))
-        .orElse(({message}) => Task.of({HttpServer: {state: 'ERROR', message}}));
+    return BPromise.promisify(server.listen.bind(server))(port)
+        .then(constant({HttpServer: {state: 'OK', message: `HTTP Server is listening on port: ${port}`}}))
+        .catch(({message}) => ({HttpServer: {state: 'ERROR', message}}));
 }
 
-function establishDBConnection() {
-    return Task.fromPromised(db.sequelize.authenticate.bind(db.sequelize))()
-        .map(constant({DB: {state: 'OK', message: 'DB connection has been established successfully'}}))
-        .orElse(({message}) => Task.of({DB: {state: 'ERROR', message}}));
+function establishDBConnectionP() {
+    return db.sequelize.authenticate()
+        .then(constant({DB: {state: 'OK', message: 'DB connection has been established successfully'}}))
+        .catch(({message}) => ({DB: {state: 'ERROR', message}}));
 }
 
 function createStartupTasks() {
-    return establishDBConnection()
-        .chain(logT('DB Status: \n'))
-        .chain(constant(serverListenT(app, PORT)))
-        .chain(logT('HTTP Server Status: \n'))
-        .chain(constant(logT('Tracker has been started.', null)));
+    return establishDBConnectionP()
+        .then(logP('DB Status: \n'))
+        .then(constant(serverListenP(app, Configs.PORT)))
+        .then(logP('HTTP Server Status: \n'))
+        .then(() => ContractService.getActivatorContractInstanceP())
+        .then(activatorInstance => {
+            log('Activator Contract is available at address:', activatorInstance.options.address);
+            activatorInstance.events.onCreateConsumerActivation()
+                .on('data', ({returnValues}) => activateConsumerHandler(returnValues))
+                .on('error', log);
+            log('Tracker is listening on onCreateConsumerActivation of Activator', null);
+            return activatorInstance;
+        });
 }
 
-createStartupTasks().run();
+createStartupTasks()
+    .then(() => logP('Tracker has been started.', null));
 
 

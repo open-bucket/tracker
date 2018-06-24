@@ -57,13 +57,11 @@ describe('/consumers integration test', () => {
             address: 'someAddress1'
         };
         const {body: createdConsumer} = await testAPI(HTTP_METHODS.POST, URL, {token}).send(CONSUMER_TO_SAVE);
-        console.log('createdConsumer', createdConsumer)
 
         // WHEN
         const {body: actualConsumer, statusCode} = await testAPI(HTTP_METHODS.GET, `${URL}/${createdConsumer.id}`, {token}).send();
 
         // THEN
-        console.log('actualConsumer', actualConsumer);
         expect(statusCode).toBe(OK);
         expect(actualConsumer).toMatchObject({
             userId: 1,

@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 export NODE_ENV='development'
-export DB_USERNAME='hungnvu'
-export DB_DIALECT='postgres'
-export DB_HOST='localhost'
-export DB_PORT=5432
-export DB_NAME='obn'
-export DB_LOGGING=1
+export OBN_DB_USERNAME='hungnvu'
+export OBN_DB_DIALECT='postgres'
+export OBN_DB_HOST='localhost'
+export OBN_DB_PORT=5432
+export OBN_DB_NAME='obn'
+export OBN_DB_LOGGING=1
+export OBN_ETHEREUM_NODE_URL='http://127.0.0.1:7545'
 export DEBUG='obn-tracker:*'

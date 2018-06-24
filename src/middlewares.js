@@ -9,10 +9,10 @@ const {validationResult} = require('express-validator/check');
  */
 const {getUserById} = require('./services/user');
 const {verifyJWT} = require('./services/crypto');
-const {createLogFn} = require('./utils');
+const {createDebugLogger} = require('./utils');
 
 // eslint-disable-next-line no-unused-vars
-const log = createLogFn('middlewares');
+const log = createDebugLogger('middlewares');
 
 function sequelizeErrorHandler(error, request, response, next) {
     if (error.name === 'SequelizeUniqueConstraintError') {
