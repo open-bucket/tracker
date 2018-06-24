@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/open-bucket/tracker#readme",
   "dependencies": {
+    "@open-bucket/contracts": "0.0.1",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.3",
     "compression": "^1.7.2",
@@ -36,8 +37,7 @@
     "ramda": "^0.25.0",
     "require-all": "^2.2.0",
     "sequelize": "^4.37.10",
-    "sequelize-cli": "^4.0.0",
-    "web3": "^1.0.0-beta.34"
+    "sequelize-cli": "^4.0.0"
   },
   "devDependencies": {
     "eslint": "^4.19.1",

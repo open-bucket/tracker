@@ -1,6 +1,7 @@
 /**
  * Lib imports
  */
+const ContractService = require('@open-bucket/contracts');
 const http = require('http');
 const BPromise = require('bluebird');
 
@@ -8,14 +9,13 @@ const BPromise = require('bluebird');
  * Project imports
  */
 const app = require('./app');
-const {PORT} = require('./configs');
+const Configs = require('./configs');
 const db = require('./db');
-const {createDebugLoggerP, constant} = require('./utils');
+const {createDebugLoggerP, createDebugLogger, constant} = require('./utils');
+const {activateConsumerHandler} = require('./services/consumer');
 
 const logP = createDebugLoggerP('index');
-
-// create a new Activator Contract if the environment is dev
-// Use existing Activator Contract if the environment is prod
+const log = createDebugLogger('index');
 
 function serverListenP(app, port) {
     const server = http.createServer(app);
@@ -33,8 +33,17 @@ function establishDBConnectionP() {
 function createStartupTasks() {
     return establishDBConnectionP()
         .then(logP('DB Status: \n'))
-        .then(constant(serverListenP(app, PORT)))
-        .then(logP('HTTP Server Status: \n'));
+        .then(constant(serverListenP(app, Configs.PORT)))
+        .then(logP('HTTP Server Status: \n'))
+        .then(() => ContractService.getActivatorContractInstanceP())
+        .then(activatorInstance => {
+            log('Activator Contract is available at address:', activatorInstance.options.address);
+            activatorInstance.events.onCreateConsumerActivation()
+                .on('data', ({returnValues}) => activateConsumerHandler(returnValues))
+                .on('error', log);
+            log('Tracker is listening on onCreateConsumerActivation of Activator', null);
+            return activatorInstance;
+        });
 }
 
 createStartupTasks()

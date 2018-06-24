@@ -19,8 +19,21 @@ function getConsumerByUserId(userId) {
     return db.Consumer.findAll({where: {userId}});
 }
 
+function activateConsumer(consumerId) {
+    // TODO
+    log('INSIDE activateConsumer: ', consumerId);
+    return consumerId;
+}
+
+function activateConsumerHandler(...rest) {
+    // TODO
+    log('activateConsumerHandler: ', rest);
+    return activateConsumer(...rest);
+}
+
 module.exports = {
     create,
     getConsumerByIdAndUserId,
-    getConsumerByUserId
+    getConsumerByUserId,
+    activateConsumerHandler
 };
