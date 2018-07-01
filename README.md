@@ -1,4 +1,10 @@
 # OBN Tracker
+
+## Run Ganache for development
+### Prerequisite:
+- Set the mnemonic phase: `salmon reopen news visual estate such shell struggle where attend educate express`
+
+
 ## Run Tracker
 __Add environment variables:__
 - NODE_ENV - default: 'development'
@@ -9,7 +15,6 @@ __Add environment variables:__
 - DB_NAME - default: 'obn'
 - DB_LOGGING - default: 1
 - DEBUG - default: 'obn-tracker:*'
-
 
 # Database
 ## Create model
