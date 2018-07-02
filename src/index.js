@@ -12,7 +12,7 @@ const app = require('./app');
 const Configs = require('./configs');
 const db = require('./db');
 const {createDebugLoggerP, createDebugLogger, constant} = require('./utils');
-const {activateConsumerHandler} = require('./services/consumer');
+const {activateConsumer, onActivationConfirmedHandler} = require('./services/consumer');
 
 const logP = createDebugLoggerP('index');
 const log = createDebugLogger('index');
@@ -38,10 +38,14 @@ function createStartupTasks() {
         .then(() => ContractService.getActivatorContractInstanceP())
         .then(activatorInstance => {
             log('Activator Contract is available at address:', activatorInstance.options.address);
-            activatorInstance.events.onCreateConsumerActivation()
-                .on('data', ({returnValues}) => activateConsumerHandler(returnValues))
+            activatorInstance.events.onConsumerActivationCreated()
+                .on('data', ({returnValues}) => activateConsumer(returnValues)
+                    .catch(log('Error while confirming consumer activation:')))
                 .on('error', log);
-            log('Tracker is listening on onCreateConsumerActivation of Activator', null);
+            activatorInstance.events.onActivationConfirmed()
+                .on('data', ({returnValues}) => onActivationConfirmedHandler(returnValues))
+                .on('error', log);
+            log('Tracker is listening on onConsumerActivationCreated of Activator', null);
             return activatorInstance;
         });
 }

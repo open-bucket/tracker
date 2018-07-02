@@ -9,8 +9,9 @@ module.exports = {
                 primaryKey: true,
                 type: Sequelize.INTEGER
             },
-            address: {
-                type: Sequelize.STRING
+            name: {
+                type: Sequelize.STRING,
+                allowNull: false
             },
             userId: {
                 type: Sequelize.INTEGER,
@@ -28,6 +29,9 @@ module.exports = {
             tier: {
                 type: Sequelize.ENUM(...Object.values(CONSUMER_TIERS)),
                 defaultValue: CONSUMER_TIERS.BASIC
+            },
+            contractAddress: {
+                type: Sequelize.STRING
             },
             createdAt: {
                 allowNull: false,
