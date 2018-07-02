@@ -14,13 +14,13 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.ENUM(...Object.values(CONSUMER_TIERS)),
             defaultValue: CONSUMER_TIERS.BASIC
         },
+        contractAddress: {
+            type: DataTypes.STRING,
+        },
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false
         },
-        contractAddress: {
-            type: DataTypes.STRING,
-        }
     });
 
     Consumer.associate = function (models) {

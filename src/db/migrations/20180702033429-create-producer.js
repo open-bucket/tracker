@@ -1,8 +1,8 @@
-const {CONSUMER_STATES, CONSUMER_TIERS} = require('../../enums');
+const {PRODUCER_STATES} = require('../../enums');
 
 module.exports = {
     up: (queryInterface, Sequelize) => {
-        return queryInterface.createTable('Consumers', {
+        return queryInterface.createTable('Producers', {
             id: {
                 allowNull: false,
                 autoIncrement: true,
@@ -23,15 +23,8 @@ module.exports = {
                 allowNull: false
             },
             state: {
-                type: Sequelize.ENUM(...Object.values(CONSUMER_STATES)),
-                defaultValue: CONSUMER_STATES.INACTIVE
-            },
-            tier: {
-                type: Sequelize.ENUM(...Object.values(CONSUMER_TIERS)),
-                defaultValue: CONSUMER_TIERS.BASIC
-            },
-            contractAddress: {
-                type: Sequelize.STRING
+                type: Sequelize.ENUM(...Object.values(PRODUCER_STATES)),
+                defaultValue: PRODUCER_STATES.INACTIVE
             },
             createdAt: {
                 allowNull: false,
@@ -43,7 +36,7 @@ module.exports = {
             }
         });
     },
-    down: queryInterface => {
-        return queryInterface.dropTable('Consumers', {cascade: true});
+    down: (queryInterface) => {
+        return queryInterface.dropTable('Producers', {cascade: true});
     }
 };
