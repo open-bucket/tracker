@@ -22,6 +22,9 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false
             },
+            address: {
+                type: Sequelize.STRING,
+            },
             state: {
                 type: Sequelize.ENUM(...Object.values(PRODUCER_STATES)),
                 defaultValue: PRODUCER_STATES.INACTIVE

@@ -12,7 +12,8 @@ const app = require('./app');
 const Configs = require('./configs');
 const db = require('./db');
 const {createDebugLoggerP, createDebugLogger, constant} = require('./utils');
-const {activateConsumer, onActivationConfirmedHandler} = require('./services/consumer');
+const {activateConsumer, onConsumerActivationConfirmedHandler} = require('./services/consumer');
+const {activateProducer, onProducerActivationConfirmedHandler} = require('./services/producer');
 
 const logP = createDebugLoggerP('index');
 const log = createDebugLogger('index');
@@ -33,20 +34,31 @@ function establishDBConnectionP() {
 function createStartupTasks() {
     return establishDBConnectionP()
         .then(logP('DB Status: \n'))
-        .then(constant(serverListenP(app, Configs.PORT)))
+        .then(() => serverListenP(app, Configs.PORT))
         .then(logP('HTTP Server Status: \n'))
-        .then(() => ContractService.getActivatorContractInstanceP())
-        .then(activatorInstance => {
-            log('Activator Contract is available at address:', activatorInstance.options.address);
-            activatorInstance.events.onConsumerActivationCreated()
+        .then(() => ContractService.getConsumerActivatorContractInstanceP())
+        .then(instance => {
+            log('Consumer Activator Contract is available at address:', instance.options.address);
+            instance.events.onActivationCreated()
                 .on('data', ({returnValues}) => activateConsumer(returnValues)
                     .catch(log('Error while confirming consumer activation:')))
                 .on('error', log);
-            activatorInstance.events.onActivationConfirmed()
-                .on('data', ({returnValues}) => onActivationConfirmedHandler(returnValues))
+            instance.events.onActivationConfirmed()
+                .on('data', ({returnValues}) => onConsumerActivationConfirmedHandler(returnValues))
                 .on('error', log);
-            log('Tracker is listening on onConsumerActivationCreated of Activator', null);
-            return activatorInstance;
+            return instance;
+        })
+        .then(() => ContractService.getProducerActivatorContractInstanceP())
+        .then(instance => {
+            log('Producer Activator Contract is available at address:', instance.options.address);
+            instance.events.onActivationCreated()
+                .on('data', ({returnValues}) => activateProducer(returnValues)
+                    .catch(log('Error while confirming producer activation:')))
+                .on('error', log);
+            instance.events.onActivationConfirmed()
+                .on('data', ({returnValues}) => onProducerActivationConfirmedHandler(returnValues))
+                .on('error', log);
+            return instance;
         });
 }
 

@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.ENUM(...Object.values(PRODUCER_STATES)),
             defaultValue: PRODUCER_STATES.INACTIVE
         },
+        address: {
+            type: DataTypes.STRING,
+        },
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false
