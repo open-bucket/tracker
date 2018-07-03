@@ -11,12 +11,12 @@ const {partialRight} = require('ramda');
  */
 const {JWT_SECRET} = require('../configs');
 
-const verifyJWT = partialRight(promisify(jwt.verify), [JWT_SECRET]);
+const verifyJWTP = partialRight(promisify(jwt.verify), [JWT_SECRET]);
 
 const createJWT = partialRight(jwt.sign, [JWT_SECRET, {expiresIn: '5h'}]);
 
 module.exports = {
-    verifyJWT,
+    verifyJWTP,
     createJWT
 };
 

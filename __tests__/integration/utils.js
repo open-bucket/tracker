@@ -7,7 +7,7 @@ const supertest = require('supertest');
  * Project imports
  */
 const {HTTP_METHODS} = require('../../src/enums');
-const app = require('../../src/app');
+const {app} = require('../../src/http');
 
 function testAPI(method = HTTP_METHODS.GET, route, options = {}) {
     const {token} = options;

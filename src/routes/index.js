@@ -15,10 +15,6 @@ const routes = require('require-all')({
     dirname: __dirname,
     filter: (fileName) => fileName !== path.basename(__filename) && fileName
 });
-const {createDebugLogger} = require('../utils');
-
-// eslint-disable-next-line no-unused-vars
-const log = createDebugLogger('routes:index');
 
 function createRouter(router) {
     return values(routes)

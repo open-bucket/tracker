@@ -20,19 +20,30 @@ function _trace(logFunc, msg, value) {
     return value;
 }
 
-function _createDebugLogger(namespace, msg, value) {
-    return _trace(debug(`obn-tracker:${namespace}`), msg, value);
+function createDebugFn(namespace) {
+    return debug(`obn-tracker:${namespace}`);
 }
 
-function _createDebugLoggerP(namespace, msg, value) {
-    return BPromise.resolve(_createDebugLogger(namespace, msg, value));
+function createDebugLogger(namespace) {
+    return (msg, value) => _trace(createDebugFn(namespace), msg, value);
 }
 
-const createDebugLogger = curry(_createDebugLogger);
-const createDebugLoggerP = curry(_createDebugLoggerP);
+function createDebugLoggerC(namespace) {
+    return curry((msg, value) => _trace(createDebugFn(namespace), msg, value));
+}
+
+function createDebugLoggerP(namespace) {
+    return (msg, value) => BPromise.resolve(_trace(createDebugFn(namespace), msg, value));
+}
+
+function createDebugLoggerCP(namespace) {
+    return curry((msg, value) => BPromise.resolve(_trace(createDebugFn(namespace), msg, value)));
+}
 
 module.exports = {
     constant,
     createDebugLogger,
-    createDebugLoggerP
+    createDebugLoggerC,
+    createDebugLoggerP,
+    createDebugLoggerCP
 };

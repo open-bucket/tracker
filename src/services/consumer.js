@@ -2,12 +2,10 @@
  * Project imports
  */
 const db = require('../db');
-const {createDebugLogger, createDebugLoggerP} = require('../utils');
+const {createDebugLoggerP} = require('../utils');
 const {CONSUMER_STATES} = require('../enums');
 const ContractService = require('@open-bucket/contracts');
 
-// eslint-disable-next-line no-unused-vars
-const log = createDebugLogger('consumer-services');
 const logP = createDebugLoggerP('consumer-services');
 
 function create({tier, name, userId}) {
@@ -26,7 +24,7 @@ function activateConsumer({consumerId: id}) {
     return db.Consumer.findAll({where: {id, state: CONSUMER_STATES.INACTIVE}})
         .then(consumer => consumer
             ? ContractService.confirmConsumerActivationP(id)
-            : logP('No INACTIVE consumer matches the consumerId on consumerActivationCreated event. Ignore the event', null));
+            : logP('No INACTIVE consumer matches the consumerId on consumerActivationCreated event. Ignore the event'));
 }
 
 function onConsumerActivationConfirmedHandler({consumerId: id, consumerContract: contractAddress}) {
