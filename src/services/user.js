@@ -1,12 +1,8 @@
 /**
  * Project imports
  */
-const {createDebugLogger} = require('../utils');
 const db = require('../db');
 const {createJWT} = require('./crypto');
-
-// eslint-disable-next-line no-unused-vars
-const log = createDebugLogger('services:user');
 
 function getUserById(userId) {
     return db.User.findOne({

@@ -12,11 +12,7 @@ const BPromise = require('bluebird');
  * Project imports
  */
 const routes = require('../routes');
-const {createDebugLogger} = require('../utils');
 const {sequelizeErrorHandler} = require('./middlewares');
-
-// eslint-disable-next-line no-unused-vars
-const log = createDebugLogger('http');
 
 const app = express()
     .use(cors())

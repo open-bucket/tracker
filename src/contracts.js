@@ -2,23 +2,23 @@
  * Project imports
  */
 const ContractService = require('@open-bucket/contracts');
-const {createDebugLogger} = require('./utils');
+const {createDebugLoggerC} = require('./utils');
 const {activateConsumer, onConsumerActivationConfirmedHandler} = require('./services/consumer');
 const {activateProducer, onProducerActivationConfirmedHandler} = require('./services/producer');
 
-const log = createDebugLogger('index');
+const logC = createDebugLoggerC('index');
 
 async function listenConsumerActivatorEventsP() {
     const instance = await ContractService.getConsumerActivatorContractInstanceP();
 
     instance.events.onActivationCreated()
         .on('data', ({returnValues}) => activateConsumer(returnValues)
-            .catch(log('Error while confirming consumer activation:')))
-        .on('error', log);
+            .catch(logC('Error while confirming consumer activation:')))
+        .on('error', logC('Error while listening consumer activation onActivationCreated:'));
 
     instance.events.onActivationConfirmed()
         .on('data', ({returnValues}) => onConsumerActivationConfirmedHandler(returnValues))
-        .on('error', log);
+        .on('error', logC('Error while listening consumer activation onActivationConfirmed:'));
 
     return instance;
 }
@@ -28,12 +28,12 @@ async function listenProducerActivatorEventsP() {
 
     instance.events.onActivationCreated()
         .on('data', ({returnValues}) => activateProducer(returnValues)
-            .catch(log('Error while confirming producer activation:')))
-        .on('error', log);
+            .catch(logC('Error while confirming producer activation:')))
+        .on('error', logC('Error while listening producer activation onActivationCreated:'));
 
     instance.events.onActivationConfirmed()
         .on('data', ({returnValues}) => onProducerActivationConfirmedHandler(returnValues))
-        .on('error', log);
+        .on('error', logC('Error while listening producer activation onActivationConfirmed:'));
 
     return instance;
 }

@@ -11,13 +11,29 @@ const BPromise = require('bluebird');
 const {verifyJWTP} = require('./services/crypto');
 const {WS_TYPE} = require('./enums');
 const PM = require('./producer-manager');
+const {createDebugLogger} = require('./utils');
+const {getProducerByIdAndUserId} = require('./services/producer');
+const {getConsumerByIdAndUserId} = require('./services/consumer');
+
+// eslint-disable-next-line no-unused-vars
+const log = createDebugLogger('ws');
 
 function verifyClient({req}, cb) {
     const token = req.headers.authorization;
+    const {type, id} = JSON.parse(req.headers['ws-metadata']);
 
     if (token) {
         verifyJWTP(token)
-            .then(() => cb(true))
+            .then(async ({userId}) => {
+                const result = type === WS_TYPE.PRODUCER
+                    ? getProducerByIdAndUserId({id, userId})
+                    : getConsumerByIdAndUserId({id, userId});
+
+                if (!result) {
+                    return cb(false, BAD_REQUEST, `User ${userId} doesn't have ${type} ${id}`);
+                }
+                return cb(true);
+            })
             .catch(({message}) => cb(false, UNAUTHORIZED, message));
     } else {
         cb(false, BAD_REQUEST, 'Token is missing');
@@ -45,7 +61,8 @@ function handleMessage({type, id}) {
 function handleClose({type, id}) {
     function handleProducerClose(id) {
         return () => {
-            return PM.remove(id);
+            PM.remove(id);
+            log('current connected Producers on handleClose:', PM.connectedProducers);
         };
     }
 
@@ -63,23 +80,20 @@ function handleClose({type, id}) {
 function startWSServerP(port) {
     return new BPromise(resolve => {
         const wss = new Server({port, clientTracking: true, verifyClient});
-        wss.on('connection', async (ws, request) => {
-            /*
-            request.headers['WS-Metadata'] must be the stringified JS Object with the schema:
-            {
-                type: PRODUCER/CONSUMER,
-                id: 1 // id of producer/consumer
-            }
-            */
-            const {type, id} = JSON.parse(request.headers['WS-Metadata']);
+        wss.on('connection', (ws, request) => {
+            const {type, id} = JSON.parse(request.headers['ws-metadata']);
 
             if (type === WS_TYPE.PRODUCER) {
+                // TODO: Handle the case when the producer is already connected
+                log('New Producer connected:', id);
                 PM.add(id, {id, ws, startedAt: new Date()});
             }
 
+            log('Current connected Producers:', PM.connectedProducers);
+
             ws.on('message', handleMessage({type, id}))
                 .on('close', handleClose({type, id}));
-        }).on('listening', () => resolve(wss));
+        }).once('listening', () => resolve(wss));
     });
 }
 

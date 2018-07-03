@@ -6,8 +6,9 @@ const db = require('./db');
 const {startHTTPServerP: _startHTTPServerP} = require('./http');
 const {startWSServerP: _startWSServerP} = require('./ws');
 const {listenConsumerActivatorEventsP, listenProducerActivatorEventsP} = require('./contracts');
-const {createDebugLoggerP, constant} = require('./utils');
+const {createDebugLoggerCP, createDebugLoggerP, constant} = require('./utils');
 
+const logCP = createDebugLoggerCP('index');
 const logP = createDebugLoggerP('index');
 
 function startHTTPServerP(port) {
@@ -31,18 +32,18 @@ function establishDBConnectionP() {
 
 function createStartupTasks() {
     return establishDBConnectionP()
-        .then(logP('DB Status: \n'))
+        .then(logCP('DB Status: \n'))
         .then(() => startHTTPServerP(HTTP_PORT))
-        .then(logP('HTTP Server Status: \n'))
+        .then(logCP('HTTP Server Status: \n'))
         .then(() => startWSServerP(WS_PORT))
-        .then(logP('WS Server Status: \n'))
+        .then(logCP('WS Server Status: \n'))
         .then(listenConsumerActivatorEventsP)
-        .then(instance => logP('Consumer Activator Contract is available at address:', instance.options.address))
+        .then(instance => logCP('Consumer Activator Contract is available at address:', instance.options.address))
         .then(listenProducerActivatorEventsP)
-        .then(instance => logP('Producer Activator Contract is available at address:', instance.options.address));
+        .then(instance => logCP('Producer Activator Contract is available at address:', instance.options.address));
 }
 
 createStartupTasks()
-    .then(() => logP('Tracker has been started.', null));
+    .then(() => logP('Tracker has been started.'));
 
 
