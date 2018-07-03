@@ -10,7 +10,7 @@ const {check} = require('express-validator/check');
  */
 const {createDebugLogger} = require('../utils');
 const {register, login} = require('../services/user');
-const {validate, auth} = require('../middlewares');
+const {validate, auth} = require('../http/middlewares');
 
 // eslint-disable-next-line no-unused-vars
 const log = createDebugLogger('routes:users');

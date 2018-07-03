@@ -7,9 +7,9 @@ const {validationResult} = require('express-validator/check');
 /**
  * Project imports
  */
-const {getUserById} = require('./services/user');
-const {verifyJWT} = require('./services/crypto');
-const {createDebugLogger} = require('./utils');
+const {getUserById} = require('../services/user');
+const {verifyJWT} = require('../services/crypto');
+const {createDebugLogger} = require('../utils');
 
 // eslint-disable-next-line no-unused-vars
 const log = createDebugLogger('middlewares');

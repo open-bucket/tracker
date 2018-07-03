@@ -8,7 +8,7 @@ const {CREATED} = require('http-status-codes');
  * Project imports
  */
 const {createDebugLogger} = require('../utils');
-const {auth} = require('../middlewares');
+const {auth} = require('../http/middlewares');
 const {create, getProducersByUserId} = require('../services/producer');
 
 // eslint-disable-next-line no-unused-vars
