@@ -9,7 +9,7 @@ const BPromise = require('bluebird');
  * Project imports
  */
 const {verifyJWTP} = require('./services/crypto');
-const {WS_TYPE} = require('./enums');
+const {WS_TYPE, PRODUCER_STATES} = require('./enums');
 const PM = require('./producer-manager');
 const {createDebugLogger} = require('./utils');
 const {getProducerByIdAndUserId} = require('./services/producer');
@@ -26,12 +26,17 @@ function verifyClient({req}, cb) {
         verifyJWTP(token)
             .then(async ({userId}) => {
                 const result = type === WS_TYPE.PRODUCER
-                    ? getProducerByIdAndUserId({id, userId})
-                    : getConsumerByIdAndUserId({id, userId});
+                    ? await getProducerByIdAndUserId({id, userId})
+                    : await getConsumerByIdAndUserId({id, userId});
 
                 if (!result) {
                     return cb(false, BAD_REQUEST, `User ${userId} doesn't have ${type} ${id}`);
                 }
+
+                if (result.state !== PRODUCER_STATES.ACTIVE) {
+                    return cb(false, BAD_REQUEST, 'Produce/Consumer is INACTIVE');
+                }
+
                 return cb(true);
             })
             .catch(({message}) => cb(false, UNAUTHORIZED, message));

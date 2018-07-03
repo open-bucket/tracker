@@ -38,9 +38,9 @@ function createStartupTasks() {
         .then(() => startWSServerP(WS_PORT))
         .then(logCP('WS Server Status: \n'))
         .then(listenConsumerActivatorEventsP)
-        .then(instance => logCP('Consumer Activator Contract is available at address:', instance.options.address))
+        .then(instance => logP('Consumer Activator Contract is available at address:', instance.options.address))
         .then(listenProducerActivatorEventsP)
-        .then(instance => logCP('Producer Activator Contract is available at address:', instance.options.address));
+        .then(instance => logP('Producer Activator Contract is available at address:', instance.options.address));
 }
 
 createStartupTasks()
