@@ -8,7 +8,7 @@ const {CREATED, BAD_REQUEST, OK, UNAUTHORIZED} = require('http-status-codes');
  */
 const {HTTP_METHODS} = require('../../src/enums');
 const db = require('../../src/db');
-const {verifyJWT} = require('../../src/services/crypto');
+const {verifyJWTP} = require('../../src/services/crypto');
 const {testAPI, login} = require('./utils');
 
 describe('/users integration test', () => {
@@ -83,7 +83,7 @@ describe('/users integration test', () => {
 
         // THEN
         expect(response.statusCode).toBe(OK);
-        await expect(verifyJWT(response.body.token)).resolves.toMatchObject(expectedDecodedTokenInfo);
+        await expect(verifyJWTP(response.body.token)).resolves.toMatchObject(expectedDecodedTokenInfo);
     });
 
     it('should return BAD_REQUEST when Login with incorrect username or password', async () => {
