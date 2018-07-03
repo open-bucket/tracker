@@ -1,6 +1,7 @@
 module.exports = {
     NODE_ENV: process.env.NODE_ENV || 'development',
     HTTP_PORT: Number(process.env.OBN_TRACKER_HTTP_PORT) || 3000,
+    TORRENT_PORT: Number(process.env.OBN_TORRENT_PORT) || 3001, 
     WS_PORT: Number(process.env.OBN_TRACKER_WS_PORT) || 4000,
     DB_USERNAME: process.env.OBN_DB_USERNAME || 'hungnvu',
     DB_PASSWORD: process.env.OBN_DB_PASSWORD || null,

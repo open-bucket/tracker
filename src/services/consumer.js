@@ -5,6 +5,7 @@ const db = require('../db');
 const {createDebugLoggerP} = require('../utils');
 const {CONSUMER_STATES} = require('../enums');
 const ContractService = require('@open-bucket/contracts');
+const { pick } = require('ramda'); 
 
 const logP = createDebugLoggerP('consumer-services');
 
@@ -17,7 +18,7 @@ function getConsumerByIdAndUserId({id, userId}) {
 }
 
 function getConsumerByUserId(userId) {
-    return db.Consumer.findAll({where: {userId}});
+    return db.Consumer.findAll({ where: { userId }, order: [['id', 'ASC']], include: [db.File] }); 
 }
 
 function activateConsumer({consumerId: id}) {
@@ -31,10 +32,25 @@ function onConsumerActivationConfirmedHandler({consumerId: id, consumerContract:
     return db.Consumer.update({contractAddress, state: CONSUMER_STATES.ACTIVE}, {where: {id}});
 }
 
+function updateConsumerByIdAndUserId({ id, userId, newValue }) { 
+    const updateAbleFields = ['address']; 
+    const fields = Object.keys(pick(updateAbleFields, newValue)); 
+    return db.Consumer.update(newValue, { 
+        // Return affected rows 
+        returning: true, 
+        where: { 
+            id, 
+            userId 
+        }, 
+        fields 
+    }); 
+}
+
 module.exports = {
     create,
     getConsumerByIdAndUserId,
     getConsumerByUserId,
     activateConsumer,
-    onConsumerActivationConfirmedHandler
+    onConsumerActivationConfirmedHandler,
+    updateConsumerByIdAndUserId
 };
