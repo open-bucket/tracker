@@ -9,14 +9,16 @@ const BPromise = require('bluebird');
  * Project imports
  */
 const {verifyJWTP} = require('./services/crypto');
-const {WS_TYPE, PRODUCER_STATES} = require('./enums');
+const {WS_TYPE, WS_ACTIONS, PRODUCER_STATES} = require('./enums');
 const PM = require('./producer-manager');
-const {createDebugLogger} = require('./utils');
+const {createDebugLogger, createDebugLoggerCP} = require('./utils');
 const {getProducerByIdAndUserId} = require('./services/producer');
 const {getConsumerByIdAndUserId} = require('./services/consumer');
+const {createFileAndShardP} = require('./services/file');
 
 // eslint-disable-next-line no-unused-vars
 const log = createDebugLogger('ws');
+const logCP = createDebugLoggerCP('ws');
 
 function verifyClient({req}, cb) {
     const token = req.headers.authorization;
@@ -53,8 +55,16 @@ function handleMessage({type, id}) {
     }
 
     function handleConsumerMessage(id) {
-        return (message) => {
-            return {message, id};
+        return (rawMessage) => {
+            const {action, payload} = JSON.parse(rawMessage);
+            switch (action) {
+                case WS_ACTIONS.CONSUMER_UPLOAD_FILE:
+                    createFileAndShardP(payload)
+                        .then((file) => log('Added a new file to DB', file.name))
+                        .catch(logCP('Error while creating file on DB'));
+            }
+            log('consumer received message: ', rawMessage);
+            return {rawMessage, id};
         };
     }
 
@@ -89,12 +99,10 @@ function startWSServerP(port) {
             const {type, id} = JSON.parse(request.headers['ws-metadata']);
 
             if (type === WS_TYPE.PRODUCER) {
-                // TODO: Handle the case when the producer is already connected
                 log('New Producer connected:', id);
                 PM.add(id, {id, ws, startedAt: new Date()});
+                log('Current connected Producers:', PM.connectedProducers);
             }
-
-            log('Current connected Producers:', PM.connectedProducers);
 
             ws.on('message', handleMessage({type, id}))
                 .on('close', handleClose({type, id}));

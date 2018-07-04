@@ -1,22 +1,19 @@
-const db = require('../db'); 
- 
-function upload({ userId, consumerId, name, magnetUris }) { 
-    return db.Consumer 
-        .findOne({ where: { id: consumerId, userId } }) 
-        .then(() => db.File.create({ 
-            consumerId, 
-            name, 
-            magnetUris 
-        })); 
-} 
- 
-function getFileByUserIdAndConsumerId({ consumerId, userId }) { 
-    return db.Consumer 
-        .findOne({ where: { userId, consumerId }, order: [['id', 'ASC']] }) 
-        .then(consumer => db.File.findAll({ where: { consumerId: consumer.id }, order: [['id', 'ASC']] })); 
-} 
- 
-module.exports = { 
-    upload, 
-    getFileByUserIdAndConsumerId 
+const db = require('../db');
+
+function getFilesByConsumerId(consumerId) {
+    return db.File.findAll({where: {consumerId}, order: [['id', 'ASC']]});
+}
+
+function createFileAndShardP(data) {
+    return db.File.create(data, {
+        include: [{
+            model: db.Shard,
+            as: 'shards'
+        }]
+    });
+}
+
+module.exports = {
+    getFilesByConsumerId,
+    createFileAndShardP
 };

@@ -1,17 +1,26 @@
 module.exports = {
     up: (queryInterface, Sequelize) => {
-        return queryInterface.createTable('Files', {
+        return queryInterface.createTable('Shards', {
             id: {
+                type: Sequelize.INTEGER,
                 allowNull: false,
                 autoIncrement: true,
                 primaryKey: true,
-                type: Sequelize.INTEGER
+            },
+            fileId: {
+                type: Sequelize.INTEGER,
+                references: {
+                    model: 'Files',
+                    key: 'id'
+                },
+                onUpdate: 'cascade',
+                onDelete: 'cascade'
             },
             name: {
                 type: Sequelize.STRING,
                 allowNull: false
             },
-            hash: {
+            magnetURI: {
                 type: Sequelize.STRING,
                 allowNull: false
             },
@@ -19,26 +28,17 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 allowNull: false
             },
-            consumerId: {
-                type: Sequelize.INTEGER,
-                references: {
-                    model: 'Consumers',
-                    key: 'id'
-                },
-                onUpdate: 'cascade',
-                onDelete: 'cascade'
-            },
             createdAt: {
+                type: Sequelize.DATE,
                 allowNull: false,
-                type: Sequelize.DATE
             },
             updatedAt: {
+                type: Sequelize.DATE,
                 allowNull: false,
-                type: Sequelize.DATE
             }
         });
     },
     down: (queryInterface) => {
-        return queryInterface.dropTable('Files');
+        return queryInterface.dropTable('Shards');
     }
 };
