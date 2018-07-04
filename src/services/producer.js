@@ -50,5 +50,5 @@ module.exports = {
     getProducerByIdAndUserId,
     activateProducer,
     onProducerActivationConfirmedHandler,
-    getShards: getProducerWithShards
+    getProducerWithShards
 };

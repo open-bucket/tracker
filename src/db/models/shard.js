@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false
         },
+        hash: {
+            type: DataTypes.STRING,
+            allowNull: false
+        },
         magnetURI: {
             type: DataTypes.STRING,
             allowNull: false

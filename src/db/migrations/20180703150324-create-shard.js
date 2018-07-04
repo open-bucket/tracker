@@ -20,6 +20,10 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false
             },
+            hash: {
+                type: Sequelize.STRING,
+                allowNull: false
+            },
             magnetURI: {
                 type: Sequelize.STRING,
                 allowNull: false

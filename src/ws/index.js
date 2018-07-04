@@ -40,6 +40,7 @@ function verifyClient({req}, cb) {
                     return cb(false, BAD_REQUEST, 'Produce/Consumer is INACTIVE');
                 }
 
+                req.model = result;
                 return cb(true);
             })
             .catch(({message}) => cb(false, UNAUTHORIZED, message));
@@ -48,36 +49,37 @@ function verifyClient({req}, cb) {
     }
 }
 
-function handleMessage({type, id}) {
+function handleMessage({type, model}) {
     return type === WS_TYPE.PRODUCER
-        ? handleProducerMessage(id)
-        : handleConsumerMessage(id);
+        ? handleProducerMessage(model)
+        : handleConsumerMessage(model);
 }
 
-function handleClose({type, id}) {
+function handleClose({type, model}) {
     return type === WS_TYPE.PRODUCER
-        ? handleProducerClose(id)
-        : handleConsumerClose(id);
+        ? handleProducerClose(model)
+        : handleConsumerClose(model);
 }
 
 function startWSServerP(port) {
     return new BPromise(resolve => {
         const wss = new Server({port, clientTracking: true, verifyClient});
         wss.on('connection', (ws, request) => {
-            const {type, id} = JSON.parse(request.headers['ws-metadata']);
+            const {type} = JSON.parse(request.headers['ws-metadata']);
+            const {model} = request;
 
             if (type === WS_TYPE.PRODUCER) {
-                log('New Producer connected:', id);
-                PM.add(id, {id, ws, startedAt: new Date()});
+                log('New Producer connected:', model.id);
+                PM.add(model.id, {model, ws, startedAt: new Date()});
                 log('Current connected Producers:', PM.connectedProducers);
             } else {
-                log('New Consumer connected:', id);
-                CM.add(id, {id, ws});
+                log('New Consumer connected:', model.id);
+                CM.add(model.id, {model, ws});
                 log('Current connected Consumers:', CM.connectedConsumers);
             }
 
-            ws.on('message', handleMessage({type, id}))
-                .on('close', handleClose({type, id}));
+            ws.on('message', handleMessage({type, model}))
+                .on('close', handleClose({type, model}));
         }).once('listening', () => resolve(wss));
     });
 }

@@ -4,24 +4,28 @@
 const PM = require('./producer-manager');
 const {createDebugLogger} = require('../utils');
 const {WS_ACTIONS} = require('../enums');
-const {getShards} = require('../services/producer');
 
 // eslint-disable-next-line no-unused-vars
 const log = createDebugLogger('ws:producer');
 
-function handleProducerMessage(id) {
+function handleProducerMessage(model) {
     return (rawMessage) => {
         const {action, payload} = JSON.parse(rawMessage);
 
         if (action === WS_ACTIONS.PRODUCER_REPORT_SPACE_STATS) {
-            PM.update(id, payload);
-            getShards(id).then(shards => {
-                PM.connectedProducers[id]
-                    .ws
-                    .send(JSON.stringify({action: 'I know!', payload: shards}));
-            });
+            log('WS_ACTIONS.PRODUCER_REPORT_SPACE_STATS received', payload);
+            PM.update(model.id, payload);
         }
 
+        if (action === WS_ACTIONS.PRODUCER_SHARD_ORDER_CONFIRM) {
+            /*
+            const {name, hash, size} = payload;
+            const shard = await db.Shard.findOne({where: {name, hash, size}})
+            shard.setProducers([{where: {id}}])
+
+             */
+            log('WS_ACTIONS.PRODUCER_SHARD_ORDER_CONFIRM received', payload);
+        }
     };
 }
 

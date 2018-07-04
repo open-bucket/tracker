@@ -1,4 +1,4 @@
-const {merge} = require('ramda');
+const {merge, forEachObjIndexed} = require('ramda');
 
 class ProducerManager {
     constructor() {
@@ -19,6 +19,12 @@ class ProducerManager {
 
     update(id, data) {
         this._connectedProducers[id] = merge(this._connectedProducers[id], data);
+    }
+
+    broadcast(message) {
+        forEachObjIndexed((producer) => {
+            producer.ws.send(message);
+        })(this.connectedProducers);
     }
 
     get connectedProducers() {
