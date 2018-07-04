@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
 
     Producer.associate = function (models) {
         Producer.belongsTo(models.User, {foreignKey: 'id'});
+        Producer.belongsToMany(models.Shard, {
+            through: 'ProducerShards',
+            as: 'shards',
+            foreignKey: 'producerId'
+        });
     };
 
     return Producer;

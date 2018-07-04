@@ -1,3 +1,5 @@
+const {merge} = require('ramda');
+
 class ProducerManager {
     constructor() {
         if (!ProducerManager.instance) {
@@ -15,11 +17,14 @@ class ProducerManager {
         delete this._connectedProducers[id];
     }
 
+    update(id, data) {
+        this._connectedProducers[id] = merge(this._connectedProducers[id], data);
+    }
+
     get connectedProducers() {
         return this._connectedProducers;
     }
 
-    // more fn here
 }
 
 const ProducerManagerInstance = new ProducerManager();

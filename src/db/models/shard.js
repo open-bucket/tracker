@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
 
     Shard.associate = function (models) {
         Shard.belongsTo(models.File, {foreignKey: 'id'});
+        Shard.belongsToMany(models.Producer, {
+            through: 'ProducerShards',
+            as: 'producers',
+            foreignKey: 'shardId'
+        });
     };
 
     return Shard;
