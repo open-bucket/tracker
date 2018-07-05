@@ -85,12 +85,13 @@ function handleProducerMessage(producerModel) {
                     const allShardsCount = await BPromise.all(allShards.map(shard =>
                         getShardAvP(shard).then(count => ({id: shard.id, count}))));
                     const minAvShard = allShardsCount.reduce((acc, curr) => acc.count < curr.count ? acc : curr);
-                    const currentAv = Number(minAvShard.count);
+                    const currentMinAv = Number(minAvShard.count);
 
                     if (CM.connectedConsumers[file.consumerId]) {
-                        await sendNewProducerAcceptedP(file, currentAv);
-                        // TODO: improve this. If many confirmation come when the fileAv is enough, this will be called many times
-                        if (currentAv >= desiredAv) {
+                        await sendNewProducerAcceptedP(file, currentMinAv);
+
+                        if (currentMinAv >= 1 && !CM.connectedConsumers[file.consumerId].done) {
+                            CM.update(file.consumerId, {done: true});
                             await sendUploadDoneP(file, allShards);
                         }
                     }
