@@ -1,3 +1,5 @@
+const {CONSUMER_TIERS} = require('../../enums');
+
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface.createTable('Files', {
@@ -13,6 +15,10 @@ module.exports = {
             },
             hash: {
                 type: Sequelize.STRING,
+                allowNull: false
+            },
+            tier: {
+                type: Sequelize.ENUM(...Object.values(CONSUMER_TIERS)),
                 allowNull: false
             },
             size: {

@@ -1,4 +1,8 @@
-const {merge, forEachObjIndexed} = require('ramda');
+/**
+ * Lib imports
+ */
+const {merge} = require('ramda');
+const BPromise = require('bluebird');
 
 class ProducerManager {
     constructor() {
@@ -21,14 +25,24 @@ class ProducerManager {
         this._connectedProducers[id] = merge(this._connectedProducers[id], data);
     }
 
-    broadcast(message) {
-        forEachObjIndexed((producer) => {
-            producer.ws.send(message);
-        })(this.connectedProducers);
+    broadcastWSP(message) {
+        return BPromise.all(Object.keys(this.connectedProducers)
+            .map(id => this.sendWSP(id, message))
+        );
+    }
+
+    sendWSP(producerId, message) {
+        return new BPromise(resolve => {
+            this.connectedProducers[producerId].ws.send(message, resolve);
+        });
     }
 
     get connectedProducers() {
         return this._connectedProducers;
+    }
+
+    get connectedProducersCount() {
+        return Object.keys(this.connectedProducers).length;
     }
 
 }

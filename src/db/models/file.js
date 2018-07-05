@@ -1,3 +1,5 @@
+const {CONSUMER_TIERS} = require('../../enums');
+
 module.exports = (sequelize, DataTypes) => {
     const File = sequelize.define('File', {
         name: {
@@ -6,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
         },
         hash: {
             type: DataTypes.STRING,
+            allowNull: false
+        },
+        tier: {
+            type: DataTypes.ENUM(...Object.values(CONSUMER_TIERS)),
             allowNull: false
         },
         size: {

@@ -5,6 +5,11 @@ const {curry} = require('ramda');
 const BPromise = require('bluebird');
 const debug = require('debug');
 
+/**
+ * Project imports
+ */
+const {CONSUMER_TIERS} = require('./enums');
+
 function constant(v) {
     return function value() {
         return v;
@@ -40,10 +45,19 @@ function createDebugLoggerCP(namespace) {
     return curry((msg, value) => BPromise.resolve(_trace(createDebugFn(namespace), msg, value)));
 }
 
+function tierToDesiredAv(tier) {
+    if (tier === CONSUMER_TIERS.BASIC)
+        return 2;
+    else if (tier === CONSUMER_TIERS.PLUS)
+        return 5;
+    else return 10; // PREMIUM
+}
+
 module.exports = {
     constant,
     createDebugLogger,
     createDebugLoggerC,
     createDebugLoggerP,
-    createDebugLoggerCP
+    createDebugLoggerCP,
+    tierToDesiredAv
 };

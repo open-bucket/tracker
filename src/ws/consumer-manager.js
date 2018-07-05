@@ -1,3 +1,8 @@
+/**
+ * Lib imports
+ */
+const BPromise = require('bluebird');
+
 class ConsumerManager {
     constructor() {
         if (!ConsumerManager.instance) {
@@ -17,6 +22,16 @@ class ConsumerManager {
 
     get connectedConsumers() {
         return this._connectedConsumers;
+    }
+
+    get connectedConsumerCount() {
+        return Object.keys(this.connectedConsumers).length;
+    }
+
+    sendWSP(consumerId, message) {
+        return new BPromise(resolve => {
+            this.connectedConsumers[consumerId].ws.send(message, resolve);
+        });
     }
 }
 
