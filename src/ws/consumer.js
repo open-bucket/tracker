@@ -42,7 +42,6 @@ function handleConsumerMessage(model) {
 function handleConsumerClose(model) {
     return () => {
         // TODO: consumer ws handle upload file
-        // when it is closed while file's availability is not enough, delete the file.
         log('Consumer disconnected:', model.id);
         CM.remove(model.id);
         log('Current connected consumers count:', CM.connectedConsumerCount);

@@ -12,6 +12,10 @@ function getFilesByConsumerId(consumerId) {
     return db.File.findAll({where: {consumerId}, order: [['id', 'ASC']]});
 }
 
+function findFileById(id) {
+    return db.File.findById(id);
+}
+
 async function createFileAndShardP(data) {
     const {tier} = await db.Consumer.findOne({
         attributes: ['tier'],
@@ -27,5 +31,6 @@ async function createFileAndShardP(data) {
 
 module.exports = {
     getFilesByConsumerId,
-    createFileAndShardP
+    createFileAndShardP,
+    findFileById
 };

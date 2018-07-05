@@ -1,6 +1,7 @@
 /**
  * Lib imports
  */
+const {merge} = require('ramda');
 const BPromise = require('bluebird');
 
 class ConsumerManager {
@@ -18,6 +19,10 @@ class ConsumerManager {
 
     remove(id) {
         delete this._connectedConsumers[id];
+    }
+
+    update(id, data) {
+        this.connectedConsumers[id] = merge(this.connectedConsumers[id], data);
     }
 
     get connectedConsumers() {

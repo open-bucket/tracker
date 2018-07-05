@@ -1,7 +1,6 @@
 /**
  * Lib imports
  */
-const {prop} = require('ramda');
 const BPromise = require('bluebird');
 
 /**
@@ -11,7 +10,8 @@ const PM = require('./producer-manager');
 const CM = require('./consumer-manager');
 const {createDebugLogger, tierToDesiredAv} = require('../utils');
 const {WS_ACTIONS} = require('../enums');
-const db = require('../db');
+const {verifyShardP, getShardAvP} = require('../services/shard');
+const {findFileById} = require('../services/file');
 
 // eslint-disable-next-line no-unused-vars
 const log = createDebugLogger('ws:producer');
@@ -37,69 +37,62 @@ function handleProducerMessage(producerModel) {
                 return PM.sendWSP(producerModel.id, JSON.stringify(message));
             }
 
-            const {id: shardId, name, hash, size} = payload;
-            const shard = await db.Shard.findOne({
-                where: {
-                    id: shardId,
-                    name, hash, size
-                }
-            });
+            function sendNewProducerAcceptedP(file, currentAv) {
+                log(`Report status to consumer ${file.consumerId}:`);
+                const message = {
+                    action: WS_ACTIONS.CONSUMER_NEW_PRODUCER_ACCEPTED,
+                    payload: {
+                        fileId: file.id,
+                        shardId: shard.id,
+                        producerId: producerModel.id,
+                        currentAv
+                    }
+                };
+                return CM.sendWSP(file.consumerId, JSON.stringify(message));
+            }
+
+            function sendUploadDoneP(file, shards) {
+                log(`File ${file.id} has current availability matched with desired availability, done uploading`);
+                const message = {
+                    action: WS_ACTIONS.CONSUMER_UPLOAD_FILE_DONE,
+                    payload: {
+                        fileId: file.id,
+                        shards
+                    }
+                };
+                return CM.sendWSP(file.consumerId, JSON.stringify(message));
+            }
+
+            // const {id: shardId, name, hash, size} = payload;
+            const shard = await verifyShardP(payload);
 
             if (!shard) {
                 await sendDenyMessageP();
             } else {
-                const file = await db.File.findById(shard.fileId);
+                const file = await findFileById(shard.fileId);
                 const desiredAv = tierToDesiredAv(file.tier);
-                // get the shard count currently in the network
-                const count = await shard.getProducers().then(prop('length'));
-                if (count >= desiredAv) {
+
+                const currentShardAv = await getShardAvP(shard);
+                if (currentShardAv >= desiredAv) {
                     await sendDenyMessageP();
                 } else {
-                    await shard.addProducer(producerModel);
                     log(`Verified PRODUCER_SHARD_ORDER_CONFIRM from Producer ${producerModel.id}, accept the confirmation`);
+                    await shard.addProducer(producerModel);
                     await sendAcceptMessageP();
 
                     // get count of all shard of the file, get the min
                     const allShards = await file.getShards();
                     const allShardsCount = await BPromise.all(allShards.map(shard =>
-                        shard.getProducers()
-                            .then(prop('length'))
-                            .then(count => ({id: shard.id, count}))
-                    ));
+                        getShardAvP(shard).then(count => ({id: shard.id, count}))));
                     const minAvShard = allShardsCount.reduce((acc, curr) => acc.count < curr.count ? acc : curr);
                     const currentAv = Number(minAvShard.count);
 
-                    log(`Report status to consumer ${file.consumerId}:`, {
-                        fileId: file.id,
-                        shardId: shard.id,
-                        producerId: producerModel.id,
-                        currentAv
-                    });
-                    const message = {
-                        action: WS_ACTIONS.CONSUMER_NEW_PRODUCER_ACCEPTED,
-                        payload: {
-                            fileId: file.id,
-                            shardId: shard.id,
-                            producerId: producerModel.id,
-                            currentAv
+                    if (CM.connectedConsumers[file.consumerId]) {
+                        await sendNewProducerAcceptedP(file, currentAv);
+                        // TODO: improve this. If many confirmation come when the fileAv is enough, this will be called many times
+                        if (currentAv >= desiredAv) {
+                            await sendUploadDoneP(file, allShards);
                         }
-                    };
-                    await CM.sendWSP(file.consumerId, JSON.stringify(message));
-
-                    // TODO: improve this. If many confirmation come when the fileAv is enough, this will be called many times
-                    if (currentAv >= desiredAv) {
-                        log(`File ${file.id} has current availability matched with desired availability, done uploading`, {
-                            desiredAv,
-                            currentAv
-                        });
-                        const message = {
-                            action: WS_ACTIONS.CONSUMER_UPLOAD_FILE_DONE,
-                            payload: {
-                                fileId: file.id,
-                                shards: allShards
-                            }
-                        };
-                        await CM.sendWSP(file.consumerId, JSON.stringify(message));
                     }
                 }
             }
