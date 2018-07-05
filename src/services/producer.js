@@ -20,6 +20,19 @@ function getProducerByIdAndUserId({id, userId}) {
     return db.Producer.findOne({where: {id, userId}});
 }
 
+function getProducerWithShards(id) {
+    return db.Producer.findOne({
+        where: {id},
+        include: [{
+            model: db.Shard,
+            as: 'shards',
+            required: false,
+            attributes: ['id', 'name', 'magnetURI', 'size'],
+            through: {attributes: []} // remove junction table fields
+        }],
+    });
+}
+
 function activateProducer({producerId: id}) {
     return db.Producer.findAll({where: {id, state: PRODUCER_STATES.INACTIVE}})
         .then(consumer => consumer
@@ -37,4 +50,5 @@ module.exports = {
     getProducerByIdAndUserId,
     activateProducer,
     onProducerActivationConfirmedHandler,
+    getProducerWithShards
 };

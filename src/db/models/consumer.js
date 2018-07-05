@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Consumer.associate = function (models) {
         Consumer.belongsTo(models.User, {foreignKey: 'id'});
+        Consumer.hasMany(models.File, {foreignKey: 'consumerId'});
     };
 
     return Consumer;

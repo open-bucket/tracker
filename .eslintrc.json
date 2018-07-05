@@ -29,6 +29,10 @@
       "error",
       "single"
     ],
+    "object-curly-spacing": [
+      "error",
+      "never"
+    ],
     "semi": [
       "error",
       "always"

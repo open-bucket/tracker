@@ -8,12 +8,15 @@ const BPromise = require('bluebird');
 /**
  * Project imports
  */
-const {verifyJWTP} = require('./services/crypto');
-const {WS_TYPE, PRODUCER_STATES} = require('./enums');
+const {verifyJWTP} = require('../services/crypto');
+const {WS_TYPE, PRODUCER_STATES} = require('../enums');
 const PM = require('./producer-manager');
-const {createDebugLogger} = require('./utils');
-const {getProducerByIdAndUserId} = require('./services/producer');
-const {getConsumerByIdAndUserId} = require('./services/consumer');
+const CM = require('./consumer-manager');
+const {handleConsumerClose, handleConsumerMessage} = require('./consumer');
+const {handleProducerClose, handleProducerMessage} = require('./producer');
+const {createDebugLogger} = require('../utils');
+const {getProducerByIdAndUserId} = require('../services/producer');
+const {getConsumerByIdAndUserId} = require('../services/consumer');
 
 // eslint-disable-next-line no-unused-vars
 const log = createDebugLogger('ws');
@@ -37,6 +40,7 @@ function verifyClient({req}, cb) {
                     return cb(false, BAD_REQUEST, 'Produce/Consumer is INACTIVE');
                 }
 
+                req.model = result;
                 return cb(true);
             })
             .catch(({message}) => cb(false, UNAUTHORIZED, message));
@@ -45,59 +49,37 @@ function verifyClient({req}, cb) {
     }
 }
 
-function handleMessage({type, id}) {
-    function handleProducerMessage(id) {
-        return (message) => {
-            return {message, id};
-        };
-    }
-
-    function handleConsumerMessage(id) {
-        return (message) => {
-            return {message, id};
-        };
-    }
-
+function handleMessage({type, model}) {
     return type === WS_TYPE.PRODUCER
-        ? handleProducerMessage(id)
-        : handleConsumerMessage(id);
+        ? handleProducerMessage(model)
+        : handleConsumerMessage(model);
 }
 
-function handleClose({type, id}) {
-    function handleProducerClose(id) {
-        return () => {
-            PM.remove(id);
-            log('current connected Producers on handleClose:', PM.connectedProducers);
-        };
-    }
-
-    function handleConsumerClose(id) {
-        return () => {
-            return id;
-        };
-    }
-
+function handleClose({type, model}) {
     return type === WS_TYPE.PRODUCER
-        ? handleProducerClose(id)
-        : handleConsumerClose(id);
+        ? handleProducerClose(model)
+        : handleConsumerClose(model);
 }
 
 function startWSServerP(port) {
     return new BPromise(resolve => {
         const wss = new Server({port, clientTracking: true, verifyClient});
         wss.on('connection', (ws, request) => {
-            const {type, id} = JSON.parse(request.headers['ws-metadata']);
+            const {type} = JSON.parse(request.headers['ws-metadata']);
+            const {model} = request;
 
             if (type === WS_TYPE.PRODUCER) {
-                // TODO: Handle the case when the producer is already connected
-                log('New Producer connected:', id);
-                PM.add(id, {id, ws, startedAt: new Date()});
+                log('New Producer connected:', model.id);
+                PM.add(model.id, {model, ws, startedAt: new Date()});
+                log('Current connected Producers count:', PM.connectedProducersCount);
+            } else {
+                log('New Consumer connected:', model.id);
+                CM.add(model.id, {model, ws});
+                log('Current connected Consumers count:', CM.connectedConsumerCount);
             }
 
-            log('Current connected Producers:', PM.connectedProducers);
-
-            ws.on('message', handleMessage({type, id}))
-                .on('close', handleClose({type, id}));
+            ws.on('message', handleMessage({type, model}))
+                .on('close', handleClose({type, model}));
         }).once('listening', () => resolve(wss));
     });
 }

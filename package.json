@@ -20,7 +20,8 @@
   },
   "homepage": "https://github.com/open-bucket/tracker#readme",
   "dependencies": {
-    "@open-bucket/contracts": "0.0.4",
+    "@open-bucket/contracts": "0.0.5",
+    "bittorrent-tracker": "^9.9.1",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.3",
     "compression": "^1.7.2",
@@ -37,7 +38,8 @@
     "ramda": "^0.25.0",
     "require-all": "^2.2.0",
     "sequelize": "^4.37.10",
-    "sequelize-cli": "^4.0.0"
+    "sequelize-cli": "^4.0.0",
+    "ws": "^5.2.1"
   },
   "devDependencies": {
     "eslint": "^4.19.1",
