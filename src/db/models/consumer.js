@@ -17,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
         contractAddress: {
             type: DataTypes.STRING,
         },
+        address: {
+            type: DataTypes.STRING,
+        },
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false

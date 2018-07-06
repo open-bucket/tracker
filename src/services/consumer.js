@@ -28,8 +28,12 @@ function activateConsumer({consumerId: id}) {
             : logP('No INACTIVE consumer matches the consumerId on consumerActivationCreated event. Ignore the event'));
 }
 
-function onConsumerActivationConfirmedHandler({consumerId: id, consumerContract: contractAddress}) {
-    return db.Consumer.update({contractAddress, state: CONSUMER_STATES.ACTIVE}, {where: {id}});
+function onConsumerActivationConfirmedHandler({consumerId: id, consumerAddress, consumerContract: contractAddress}) {
+    return db.Consumer.update({
+        contractAddress,
+        state: CONSUMER_STATES.ACTIVE,
+        address: consumerAddress
+    }, {where: {id}});
 }
 
 function updateConsumerByIdAndUserId({id, userId, newValue}) {
