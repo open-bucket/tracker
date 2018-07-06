@@ -33,15 +33,18 @@ function getProducerWithShards(id) {
     });
 }
 
-function activateProducer({producerId: id}) {
+function activateProducer({modelId: id}) {
     return db.Producer.findAll({where: {id, state: PRODUCER_STATES.INACTIVE}})
         .then(consumer => consumer
             ? ContractService.confirmProducerActivationP(id)
             : logP('No INACTIVE producer matches the consumerId on consumerActivationCreated event. Ignore the event'));
 }
 
-function onProducerActivationConfirmedHandler({producerId: id, producerAddress: address}) {
-    return db.Producer.update({address, state: PRODUCER_STATES.ACTIVE}, {where: {id}});
+function onProducerActivationConfirmedHandler({producerId, producer}) {
+    return db.Producer.update({
+        address: producer,
+        state: PRODUCER_STATES.ACTIVE
+    }, {where: {id: producerId}});
 }
 
 module.exports = {
