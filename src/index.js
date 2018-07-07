@@ -31,8 +31,13 @@ function startTorrentTrackerP(port) {
 }
 
 function establishDBConnectionP() {
+    function resetShardStatesP() {
+        return db.sequelize.query('DELETE FROM "ProducerShards"', {type: db.sequelize.QueryTypes.DELETE});
+    }
+
     return db.sequelize.authenticate()
-        .then(constant({DB: {state: 'OK', message: 'DB connection has been established successfully'}}))
+        .then(resetShardStatesP)
+        .then(constant({DB: {state: 'OK', message: 'Database is OK'}}))
         .catch(({message}) => ({DB: {state: 'ERROR', message}}));
 }
 

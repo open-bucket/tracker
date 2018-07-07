@@ -15,7 +15,7 @@ const {
     getAllConsumersByUserId,
     updateConsumerByIdAndUserId
 } = require('../services/consumer');
-const {getFilesByConsumerId} = require('../services/file');
+const {getAllFilesByConsumerId} = require('../services/file');
 
 // NOTICE: only use for /:id/* endpoints & MUST be added before auth() middleware
 function authConsumer() {
@@ -37,7 +37,7 @@ router.get('/:id/files', auth(), authConsumer(),
     validate([check('id').isNumeric()]),
     (request, response, next) => {
         const {id} = request.params;
-        return getFilesByConsumerId(id)
+        return getAllFilesByConsumerId(id)
             .then(files => response.send(files))
             .catch(next);
     });

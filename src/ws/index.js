@@ -70,7 +70,7 @@ function startWSServerP(port) {
 
             if (type === WS_TYPE.PRODUCER) {
                 log(`Producer ${model.id} connected`);
-                PM.add(model.id, {model, ws, startedAt: new Date()});
+                PM.add(model.id, {model, ws});
                 log('Current connected Producers count:', PM.connectedProducersCount);
             } else {
                 log(`Consumer ${model.id} connected`);

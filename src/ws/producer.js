@@ -11,7 +11,7 @@ const CM = require('./consumer-manager');
 const {createDebugLogger, tierToDesiredAv} = require('../utils');
 const {WS_ACTIONS} = require('../enums');
 const {verifyShardP, getShardAvP} = require('../services/shard');
-const {findFileById} = require('../services/file');
+const {getFileById} = require('../services/file');
 
 // eslint-disable-next-line no-unused-vars
 const log = createDebugLogger('ws:producer');
@@ -63,13 +63,12 @@ function handleProducerMessage(producerModel) {
                 return CM.sendWSP(file.consumerId, JSON.stringify(message));
             }
 
-            // const {id: shardId, name, hash, size} = payload;
             const shard = await verifyShardP(payload);
 
             if (!shard) {
                 await sendDenyMessageP();
             } else {
-                const file = await findFileById(shard.fileId);
+                const file = await getFileById(shard.fileId);
                 const desiredAv = tierToDesiredAv(file.tier);
 
                 const currentShardAv = await getShardAvP(shard);
@@ -97,7 +96,6 @@ function handleProducerMessage(producerModel) {
                     }
                 }
             }
-
         }
 
         log(`Received new message from Producer ${producerModel.id}`, rawMessage);
@@ -117,7 +115,7 @@ function handleProducerMessage(producerModel) {
 
 function handleProducerClose(producerModel) {
     return async () => {
-        log('Producer disconnected:', producerModel.id);
+        log(`Producer ${producerModel.id} disconnected`);
         PM.remove(producerModel.id);
         log('Current connected producers:', PM.connectedProducersCount);
         const missingShards = await producerModel.getShards();
