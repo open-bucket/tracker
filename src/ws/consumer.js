@@ -86,7 +86,16 @@ async function handleDownloadFileConfirmation({hash, fileId}, consumer) {
         action: WS_ACTIONS.CONSUMER_DOWNLOAD_FILE_DONE,
         payload: {id: fileId, name: file.name, shards}
     };
-    return CM.sendWSP(consumer.id, JSON.stringify(message));
+    return BPromise.all([
+        CM.sendWSP(consumer.id, JSON.stringify(message)),
+        ...producers.map(({shards, id}) => {
+            const message = {
+                action: WS_ACTIONS.PRODUCER_SERVE_FILE_DONE,
+                payload: {consumerContractAddress: consumer.contractAddress, shards: shards.map(pick(['name']))}
+            };
+            return PM.sendWSP(id, JSON.stringify(message));
+        }),
+    ]);
 }
 
 function handleConsumerMessage(model) {
