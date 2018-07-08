@@ -4,7 +4,7 @@ Open Bucket Tracker
 For more information about the Open Bucket network, refer to: https://github.com/open-bucket/blueprint
 
 ## Production
-This project's just for demo purpose & not suitable for production (we only do the development it on Ganache)
+This project's just for demo purpose & not suitable for production. But PRs are welcome.
 
 ## Development
 - Refer to https://github.com/open-bucket/dev for more information
