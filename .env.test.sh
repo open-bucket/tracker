@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-export NODE_ENV='test'
-export OBN_DB_USERNAME='hungnvu'
-export OBN_DB_DIALECT='postgres'
-export OBN_DB_HOST='localhost'
-export OBN_DB_PORT=5432
-export OBN_DB_NAME='obn-test'
-export OBN_DB_LOGGING=0
-export DEBUG='obn-tracker:*'
