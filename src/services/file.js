@@ -40,7 +40,7 @@ async function getServingProducersP(fileId) {
     });
     return producers.map(({address, shards, id}) => {
         const servingBytes = shards.reduce((acc, curr) => acc + curr.size, 0);
-        return {id, address, servingBytes};
+        return {id, address, servingBytes, shards};
     });
 }
 
