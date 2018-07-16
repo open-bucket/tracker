@@ -13,7 +13,7 @@ function create({name, userId}) {
 }
 
 function getProducersByUserId(userId) {
-    return db.Producer.findAll({where: {userId}});
+    return db.Producer.findAll({where: {userId}, order: [['id', 'ASC']]});
 }
 
 function getProducerByIdAndUserId({id, userId}) {
