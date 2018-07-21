@@ -52,7 +52,7 @@ function listenActivatorEvents() {
         .then(instance => logP('Producer Activator Contract is available at address:', instance.options.address));
 }
 
-function createStartupTasks() {
+function runStartupTasks() {
     return BPromise.all([
         establishDBConnectionP(),
         startHTTPServerP(HTTP_PORT),
@@ -62,7 +62,7 @@ function createStartupTasks() {
     ]);
 }
 
-createStartupTasks()
+runStartupTasks()
     .then((statuses) => logP('Tracker has been started.', statuses));
 
 

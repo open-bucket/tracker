@@ -10,10 +10,8 @@ const BPromise = require('bluebird');
  */
 const {verifyJWTP} = require('../services/crypto');
 const {WS_TYPE, PRODUCER_STATES} = require('../enums');
-const PM = require('./producer-manager');
-const CM = require('./consumer-manager');
-const {handleConsumerClose, handleConsumerMessage} = require('./consumer');
-const {handleProducerClose, handleProducerMessage} = require('./producer');
+const {handleConsumerClose, handleConsumerMessage, handleConsumerConnection} = require('./consumer');
+const {handleProducerClose, handleProducerMessage, handleProducerConnection} = require('./producer');
 const {createDebugLogger} = require('../utils');
 const {getProducerByIdAndUserId} = require('../services/producer');
 const {getConsumerByIdAndUserId} = require('../services/consumer');
@@ -49,6 +47,12 @@ function verifyClient({req}, cb) {
     }
 }
 
+function handleConnection({type, model, ws}) {
+    return type === WS_TYPE.PRODUCER
+        ? handleProducerConnection({model, ws})
+        : handleConsumerConnection({model, ws});
+}
+
 function handleMessage({type, model}) {
     return type === WS_TYPE.PRODUCER
         ? handleProducerMessage(model)
@@ -68,18 +72,11 @@ function startWSServerP(port) {
             const {type} = JSON.parse(request.headers['ws-metadata']);
             const {model} = request;
 
-            if (type === WS_TYPE.PRODUCER) {
-                log(`Producer ${model.id} connected`);
-                PM.add(model.id, {model, ws});
-                log('Current connected Producers count:', PM.connectedProducersCount);
-            } else {
-                log(`Consumer ${model.id} connected`);
-                CM.add(model.id, {model, ws});
-                log('Current connected Consumers count:', CM.connectedConsumerCount);
-            }
-
             ws.on('message', handleMessage({type, model}))
                 .on('close', handleClose({type, model}));
+
+            return handleConnection({type, model, ws});
+
         }).once('listening', () => resolve(wss));
     });
 }

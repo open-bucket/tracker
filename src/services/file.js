@@ -2,14 +2,20 @@
  * Lib imports
  */
 const {assoc, map, prop} = require('ramda');
+const BPromise = require('bluebird');
 
 /**
  * Project imports
  */
 const db = require('../db');
+const {tierToDesiredAv} = require('../utils');
 
 function getAllFilesByConsumerId(consumerId) {
     return db.File.findAll({where: {consumerId}, order: [['id', 'ASC']]});
+}
+
+function getAllFilesP() {
+    return db.File.findAll();
 }
 
 function getFileById(id) {
@@ -44,14 +50,28 @@ async function getServingProducersP(fileId) {
     });
 }
 
+async function getUnmatchedAvShardsP(fileId) {
+    const file = await db.File.findById(fileId);
+    const desiredAv = tierToDesiredAv(file.tier);
+
+    const shards = await db.Shard.findAll({where: {fileId}});
+
+    return BPromise.filter(shards, async s => {
+        const producers = await s.getProducers();
+        return producers.length < desiredAv;
+    });
+}
+
 function getAllShards(fileId) {
     return db.Shard.findAll({where: {fileId}});
 }
 
 module.exports = {
+    getAllFilesP,
     getAllFilesByConsumerId,
     createFileAndShardP,
     getFileById,
     getServingProducersP,
-    getAllShards
+    getAllShards,
+    getUnmatchedAvShardsP
 };

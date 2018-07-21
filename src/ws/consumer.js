@@ -122,6 +122,12 @@ function handleConsumerMessage(model) {
     };
 }
 
+function handleConsumerConnection({model, ws}) {
+    log(`Consumer ${model.id} connected`);
+    CM.add(model.id, {model, ws});
+    log('Current connected Consumers count:', CM.connectedConsumerCount);
+}
+
 function handleConsumerClose(model) {
     return () => {
         log('Consumer disconnected:', model.id);
@@ -132,5 +138,6 @@ function handleConsumerClose(model) {
 
 module.exports = {
     handleConsumerMessage,
-    handleConsumerClose
+    handleConsumerClose,
+    handleConsumerConnection
 };
