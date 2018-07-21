@@ -11,7 +11,7 @@ const BigNumber = require('bignumber.js');
 const CM = require('./consumer-manager');
 const PM = require('./producer-manager');
 const {createDebugLogger} = require('../utils');
-const {createFileAndShardP, getFileById, getServingProducersP, getAllShards} = require('../services/file');
+const {createFileAndShardP, getFileById, getServingProducersP, getShards} = require('../services/file');
 const {WS_ACTIONS} = require('../enums');
 const ContractService = require('@open-bucket/contracts');
 
@@ -60,7 +60,7 @@ async function handleDownloadFile({fileId}, consumer) {
         return CM.sendWSP(consumer.id, JSON.stringify(message));
     }
 
-    const shards = await getAllShards(fileId).then(map(pick(['name', 'magnetURI'])));
+    const shards = await getShards(fileId).then(map(pick(['name', 'magnetURI'])));
     const message = {
         action: WS_ACTIONS.CONSUMER_DOWNLOAD_FILE_INFO,
         payload: {name: file.name, shards}
@@ -81,7 +81,7 @@ async function handleDownloadFileConfirmation({hash, fileId}, consumer) {
 
     await ContractService.confirmProducerServingP(consumer.contractAddress, producers);
 
-    const shards = await getAllShards(fileId);
+    const shards = await getShards(fileId);
     const message = {
         action: WS_ACTIONS.CONSUMER_DOWNLOAD_FILE_DONE,
         payload: {id: fileId, name: file.name, shards}

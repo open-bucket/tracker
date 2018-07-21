@@ -2,8 +2,9 @@
  * Lib imports
  */
 const router = require('express').Router();
-const {CREATED, NOT_FOUND} = require('http-status-codes');
+const {CREATED, NOT_FOUND, BAD_REQUEST} = require('http-status-codes');
 const {check} = require('express-validator/check');
+const BPromise = require('bluebird');
 
 /**
  * Project imports
@@ -15,7 +16,9 @@ const {
     getAllConsumersByUserId,
     updateConsumerByIdAndUserId
 } = require('../services/consumer');
-const {getAllFilesByConsumerId} = require('../services/file');
+const {getAllFilesByConsumerId, getFileById, getShards, deleteFile} = require('../services/file');
+const PM = require('../ws/producer-manager');
+const {WS_ACTIONS} = require('../enums');
 
 // NOTICE: only use for /:id/* endpoints & MUST be added before auth() middleware
 function authConsumer() {
@@ -73,6 +76,33 @@ router.post('/', auth(),
             .then((data) => response.status(CREATED).send(data))
             .catch(next);
     });
+
+router.delete('/:id/files/:fileId', auth(), authConsumer(),
+    async (request, response) => {
+        const {id: consumerId, fileId} = request.params;
+        const file = await getFileById(fileId);
+        if (!file) {
+            return response.status(BAD_REQUEST).send('File is not exist');
+        }
+
+        if (file.consumerId !== Number(consumerId)) {
+            return response.status(BAD_REQUEST).send('You don\t have permission to delete this file');
+        }
+
+        const shards = await getShards(fileId);
+        await BPromise.map(shards, async shard => {
+            const producers = await shard.getProducers();
+            const message = JSON.stringify({
+                action: WS_ACTIONS.PRODUCER_DELETE_SHARD,
+                payload: {name: shard.name, id: shard.id, magnetURI: shard.magnetURI}
+            });
+            BPromise.map(producers, producer => PM.sendWSP(producer.id, message));
+        });
+
+        await deleteFile(fileId);
+        response.send('OK');
+    });
+
 
 module.exports = {
     path: '/consumers',
