@@ -2,6 +2,7 @@
  * Lib imports
  */
 const BPromise = require('bluebird');
+const {flatten} = require('ramda');
 
 /**
  * Project imports
@@ -11,7 +12,7 @@ const CM = require('./consumer-manager');
 const {createDebugLogger, tierToDesiredAv} = require('../utils');
 const {WS_ACTIONS} = require('../enums');
 const {verifyShardP, getShardAvP} = require('../services/shard');
-const {getFileById} = require('../services/file');
+const {getFileById, getAllFilesP, getUnmatchedAvShardsP} = require('../services/file');
 
 // eslint-disable-next-line no-unused-vars
 const log = createDebugLogger('ws:producer');
@@ -132,7 +133,25 @@ function handleProducerClose(producerModel) {
     };
 }
 
+async function handleProducerConnection({model, ws}) {
+    log(`Producer ${model.id} connected`);
+    PM.add(model.id, {model, ws});
+    log('Current connected Producers count:', PM.connectedProducersCount);
+    const allFiles = await getAllFilesP();
+    const unmatchedAvShards = await BPromise
+        .map(allFiles, f => getUnmatchedAvShardsP(f.id))
+        .then(flatten);
+    await BPromise.map(unmatchedAvShards, ({id, name, magnetURI, size}) => {
+        const message = {
+            action: WS_ACTIONS.PRODUCER_SHARD_ORDER,
+            payload: {id, name, magnetURI, size}
+        };
+        return PM.sendWSP(model.id, JSON.stringify(message));
+    });
+}
+
 module.exports = {
     handleProducerMessage,
-    handleProducerClose
+    handleProducerClose,
+    handleProducerConnection
 };
