@@ -62,8 +62,12 @@ async function getUnmatchedAvShardsP(fileId) {
     });
 }
 
-function getAllShards(fileId) {
+function getShards(fileId) {
     return db.Shard.findAll({where: {fileId}});
+}
+
+function deleteFile(fileId) {
+    return db.File.destroy({where: {id: fileId}});
 }
 
 module.exports = {
@@ -72,6 +76,7 @@ module.exports = {
     createFileAndShardP,
     getFileById,
     getServingProducersP,
-    getAllShards,
-    getUnmatchedAvShardsP
+    getShards,
+    getUnmatchedAvShardsP,
+    deleteFile
 };
