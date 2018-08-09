@@ -9,7 +9,7 @@ const {check} = require('express-validator/check');
  * Project imports
  */
 const {validate, auth} = require('../http/middlewares');
-const {create, getProducersByUserId, getProducerByIdAndUserId} = require('../services/producer');
+const {create, getProducersByUserId, getProducerByIdAndUserId, updateProducerByIdAndUserId} = require('../services/producer');
 
 // NOTICE: only use for /:id/* endpoints & MUST be added before auth() middleware
 function authProducer() {
@@ -40,6 +40,16 @@ router.get('/:id', auth(), authProducer(),
     validate([check('id').isNumeric()]),
     (request, response) => {
         response.send(request.producer);
+    });
+
+router.put('/:id', auth(), authProducer(),
+    validate([check('id').isNumeric()]),
+    (request, response, next) => {
+        const {id} = request.params;
+        const userId = request.user.id;
+        return updateProducerByIdAndUserId({id, userId, newValue: request.body})
+            .then((updatedConsumer) => response.send(updatedConsumer))
+            .catch(next);
     });
 
 router.get('/', auth(),

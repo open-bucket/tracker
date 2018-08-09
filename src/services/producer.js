@@ -5,6 +5,7 @@ const db = require('../db');
 const {PRODUCER_STATES} = require('../enums');
 const {createDebugLoggerP} = require('../utils');
 const ContractService = require('@open-bucket/contracts');
+const {pick} = require('ramda');
 
 const logP = createDebugLoggerP('consumer-services');
 
@@ -47,11 +48,19 @@ function onProducerActivationConfirmedHandler({producerId, producer}) {
     }, {where: {id: producerId}});
 }
 
+function updateProducerByIdAndUserId({id, userId, newValue}) {
+    const validFields = ['name'];
+    const fields = Object.keys(pick(validFields, newValue));
+    return db.Producer.update(newValue, {returning: true, where: {id, userId}, fields})
+        .then(affectedRows => affectedRows[1][0]);
+}
+
 module.exports = {
     create,
     getProducersByUserId,
     getProducerByIdAndUserId,
     activateProducer,
     onProducerActivationConfirmedHandler,
-    getProducerWithShards
+    getProducerWithShards,
+    updateProducerByIdAndUserId
 };
