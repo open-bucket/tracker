@@ -10,6 +10,7 @@ const {check} = require('express-validator/check');
  */
 const {validate, auth} = require('../http/middlewares');
 const {create, getProducersByUserId, getProducerByIdAndUserId, updateProducerByIdAndUserId} = require('../services/producer');
+const PM = require('../ws/producer-manager');
 
 // NOTICE: only use for /:id/* endpoints & MUST be added before auth() middleware
 function authProducer() {
@@ -33,6 +34,14 @@ router.post('/', auth(),
         const userId = request.user.id;
         return create({name, userId})
             .then((data) => response.status(CREATED).send(data))
+            .catch(next);
+    });
+
+router.get('/connected', auth(),
+    (request, response, next) => {
+        return getProducersByUserId(request.user.id)
+            .then(ps => ps.filter(p => !!PM.connectedProducers[p.id]))
+            .then(result => response.send(result))
             .catch(next);
     });
 
