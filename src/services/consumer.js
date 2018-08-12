@@ -37,7 +37,7 @@ function onConsumerActivationConfirmedHandler({consumerId, consumer, consumerCon
 }
 
 function updateConsumerByIdAndUserId({id, userId, newValue}) {
-    const validFields = ['name'];
+    const validFields = ['name','tier'];
     const fields = Object.keys(pick(validFields, newValue));
     return db.Consumer.update(newValue, {returning: true, where: {id, userId}, fields})
         .then(affectedRows => affectedRows[1][0]);
